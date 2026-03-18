@@ -100,6 +100,12 @@ export default function AdminStudents() {
     if (!selectedStudent || !enrollCourseId) return;
 
     try {
+      const existing = studentEnrollments.find(e => e.course_id === enrollCourseId);
+      if (existing) {
+        alert('Student is already enrolled in this course.');
+        return;
+      }
+
       const course = allCourses.find(c => c.id === enrollCourseId);
       const { error } = await supabase
         .from('enrollments')
@@ -431,9 +437,14 @@ export default function AdminStudents() {
                   className="w-full bg-[#0d1117] border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                 >
                   <option value="">Choose a course...</option>
-                  {allCourses.map(course => (
-                    <option key={course.id} value={course.id}>{course.title}</option>
-                  ))}
+                  {allCourses
+                    .filter(c => !studentEnrollments.some(e => e.course_id === c.id))
+                    .map(course => (
+                      <option key={course.id} value={course.id}>{course.title}</option>
+                    ))}
+                  {allCourses.filter(c => !studentEnrollments.some(e => e.course_id === c.id)).length === 0 && (
+                    <option value="" disabled>No more courses to enroll (already enrolled in all)</option>
+                  )}
                 </select>
               </div>
               <button 

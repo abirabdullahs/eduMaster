@@ -52,6 +52,8 @@ export default function Navbar() {
     { href: '/courses', label: 'Courses' },
     { href: '/exams/public', label: 'Exams' },
     { href: '/about', label: 'About' },
+    { href: '/support', label: 'Support' },
+    { href: '/contact', label: 'Contact' },
   ];
 
   return (

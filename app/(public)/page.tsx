@@ -3,6 +3,7 @@ import StatsSection from '@/components/home/StatsSection';
 import FeaturedCourses from '@/components/home/FeaturedCourses';
 import UpcomingExams from '@/components/home/UpcomingExams';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
+import FAQSection from '@/components/home/FAQSection';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -13,6 +14,7 @@ export default function HomePage() {
       <FeaturedCourses />
       <UpcomingExams />
       <TestimonialsSection />
+      <FAQSection />
       
       {/* Call to Action Section */}
       <section className="py-24 bg-[#0a0f1e] relative">

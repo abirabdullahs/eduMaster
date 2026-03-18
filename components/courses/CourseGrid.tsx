@@ -8,8 +8,8 @@ interface CourseGridProps {
 export default function CourseGrid({ courses }: CourseGridProps) {
   if (!courses.length) {
     return (
-      <div className="text-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed">
-        <p className="text-slate-500">No courses found matching your criteria.</p>
+      <div className="text-center py-20 bg-white/5 rounded-2xl border-2 border-dashed border-slate-800">
+        <p className="text-slate-400">No courses found matching your criteria.</p>
       </div>
     )
   }

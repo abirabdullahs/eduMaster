@@ -39,8 +39,8 @@ export default function StatsSection() {
       ]);
 
       setStats([
-        { label: 'শিক্ষার্থী', value: (studentsCount || 0) + 1200, icon: Users, color: 'text-indigo-500', suffix: '+' },
-        { label: 'কোর্স', value: (coursesCount || 0) + 15, icon: BookOpen, color: 'text-purple-500' },
+        { label: 'শিক্ষার্থী', value: Math.max((studentsCount || 0), 500), icon: Users, color: 'text-indigo-500', suffix: '+' },
+        { label: 'কোর্স', value: Math.max((coursesCount || 0), 10), icon: BookOpen, color: 'text-purple-500', suffix: '+' },
         { label: 'শিক্ষক', value: (teachersCount || 0) + 25, icon: GraduationCap, color: 'text-emerald-500' },
         { label: 'পরীক্ষা', value: (examsCount || 0) + 500, icon: FileText, color: 'text-blue-500', suffix: '+' },
       ]);

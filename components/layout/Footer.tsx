@@ -4,7 +4,7 @@ import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'luci
 export default function Footer() {
   return (
     <footer className="bg-[#050811] border-t border-white/5 pt-20 pb-10 px-6 font-poppins">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-12 mb-12 sm:mb-16">
         {/* Brand */}
         <div className="space-y-6">
           <Link href="/" className="flex items-center gap-2">
@@ -47,10 +47,10 @@ export default function Footer() {
         <div className="space-y-6">
           <h3 className="text-white font-bold text-lg">Support</h3>
           <ul className="space-y-4">
-            <li><Link href="#" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Privacy Policy</Link></li>
-            <li><Link href="#" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Terms of Service</Link></li>
-            <li><Link href="#" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Refund Policy</Link></li>
-            <li><Link href="#" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Contact Support</Link></li>
+            <li><Link href="/terms" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Terms & Conditions</Link></li>
+            <li><Link href="/support" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Support</Link></li>
+            <li><Link href="/refund-policy" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Refund Policy</Link></li>
+            <li><Link href="/contact" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">Contact Support</Link></li>
           </ul>
         </div>
 
@@ -60,15 +60,20 @@ export default function Footer() {
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
               <MapPin className="text-indigo-500 shrink-0 mt-1" size={18} />
-              <span className="text-slate-400 text-sm">Farmgate, Dhaka, Bangladesh</span>
+              <span className="text-slate-400 text-sm">House No: 54, Darussalam Rd, Dhaka 1216</span>
             </li>
-            <li className="flex items-center gap-3">
-              <Phone className="text-indigo-500 shrink-0" size={18} />
-              <span className="text-slate-400 text-sm">+880 1700 000000</span>
+            <li className="flex flex-col gap-1">
+              <div className="flex items-center gap-3">
+                <Phone className="text-indigo-500 shrink-0" size={18} />
+                <span className="text-slate-400 text-sm">01406751374</span>
+              </div>
+              <div className="flex items-center gap-3 pl-7">
+                <span className="text-slate-400 text-sm">01410751374</span>
+              </div>
             </li>
             <li className="flex items-center gap-3">
               <Mail className="text-indigo-500 shrink-0" size={18} />
-              <span className="text-slate-400 text-sm">support@edumaster.com</span>
+              <a href="mailto:contact@abirabdullah.me" className="text-slate-400 hover:text-indigo-400 text-sm transition-colors">contact@abirabdullah.me</a>
             </li>
           </ul>
         </div>
@@ -76,7 +81,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 text-center">
         <p className="text-slate-500 text-xs">
-          © {new Date().getFullYear()} EduMaster. All rights reserved. Developed with ❤️ in Bangladesh.
+          © {new Date().getFullYear()} EduMaster. All rights reserved. Developed with ❤️ by <a href="https://abirabdullah.me" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">abirabdullah</a>
         </p>
       </div>
     </footer>

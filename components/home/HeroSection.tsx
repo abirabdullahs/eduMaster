@@ -51,11 +51,11 @@ export default function HeroSection() {
                 </div>
               ))}
               <div className="w-10 h-10 rounded-full border-2 border-[#0a0f1e] bg-indigo-600 flex items-center justify-center text-[10px] font-bold text-white">
-                +10k
+                +500
               </div>
             </div>
             <p className="text-sm text-slate-500">
-              <span className="text-white font-bold">১০,০০০+</span> শিক্ষার্থী আমাদের সাথে শিখছে
+              <span className="text-white font-bold">৫০০+</span> শিক্ষার্থী আমাদের সাথে শিখছে
             </p>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function HeroSection() {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400">Total Courses</p>
-                  <p className="text-lg font-bold text-white">৫০+</p>
+                  <p className="text-lg font-bold text-white">১০+</p>
                 </div>
               </div>
               <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">

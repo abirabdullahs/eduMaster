@@ -36,7 +36,12 @@ export async function POST(req: Request) {
       .single()
 
     if (enrollErr || !enrollment) {
-      return NextResponse.json({ error: 'Enrollment not found' }, { status: 404 })
+      console.error('Enrollment fetch error:', enrollErr)
+      const errMsg = enrollErr?.message || 'Enrollment not found'
+      if (enrollErr?.message?.toLowerCase().includes('invalid') || enrollErr?.message?.toLowerCase().includes('jwt')) {
+        return NextResponse.json({ error: 'Server configuration error. Please ensure SUPABASE_SERVICE_ROLE_KEY is set correctly in .env.local' }, { status: 500 })
+      }
+      return NextResponse.json({ error: errMsg }, { status: 404 })
     }
 
     const { error: updateErr } = await admin

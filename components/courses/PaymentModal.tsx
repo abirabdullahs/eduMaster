@@ -26,6 +26,19 @@ export default function PaymentModal({ course, onClose, onSuccess }: PaymentModa
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('User not authenticated');
 
+      const { data: existing } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('student_id', session.user.id)
+        .eq('course_id', course.id)
+        .maybeSingle();
+
+      if (existing) {
+        alert('You are already enrolled in this course (pending or active).');
+        setSubmitting(false);
+        return;
+      }
+
       const { error } = await supabase
         .from('enrollments')
         .insert({
