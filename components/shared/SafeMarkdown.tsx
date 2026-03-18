@@ -6,14 +6,14 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
-const rehypePluginsWithMath = [rehypeKatex()];
-const remarkPluginsWithMath = [remarkMath];
+import type { PluggableList } from 'unified';
+
+const rehypePluginsWithMath: PluggableList = [rehypeKatex()];
+const remarkPluginsWithMath: PluggableList = [remarkMath];
 
 interface SafeMarkdownProps {
   children: string;
   className?: string;
-  remarkPlugins?: unknown[];
-  rehypePlugins?: unknown[];
   components?: Record<string, React.ComponentType<any>>;
 }
 
@@ -43,8 +43,6 @@ class MarkdownErrorBoundary extends Component<
 export default function SafeMarkdown({
   children,
   className = '',
-  remarkPlugins = remarkPluginsWithMath,
-  rehypePlugins = rehypePluginsWithMath,
   components,
 }: SafeMarkdownProps) {
   const content = String(children ?? '');
@@ -58,7 +56,11 @@ export default function SafeMarkdown({
   );
   return (
     <MarkdownErrorBoundary key={content} content={content} fallback={fallback}>
-      <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={components}>
+      <ReactMarkdown
+        remarkPlugins={remarkPluginsWithMath}
+        rehypePlugins={rehypePluginsWithMath}
+        components={components}
+      >
         {content}
       </ReactMarkdown>
     </MarkdownErrorBoundary>
