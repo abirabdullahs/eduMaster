@@ -27,7 +27,7 @@ const questionSchema = z.object({
   option_c_image: z.string().url('Invalid image URL').optional().or(z.literal('')),
   option_d_image: z.string().url('Invalid image URL').optional().or(z.literal('')),
   correct_option: z.enum(['a', 'b', 'c', 'd']),
-  order_index: z.number().default(0),
+  order_index: z.number(),
 });
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
