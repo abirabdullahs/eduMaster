@@ -15,11 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Exam, Question } from '@/lib/types';
-import Markdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
-import 'katex/dist/katex.min.css';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
 import confetti from 'canvas-confetti';
 
 interface ResultCardProps {
@@ -113,9 +109,7 @@ export default function ResultCard({ result, exam, onRetry, isPractice }: Result
                     </div>
                     <div className="flex-1 space-y-4">
                       <div className="prose prose-invert prose-sm max-w-none">
-                        <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
-                          {String(item.question_text ?? 'Question content loading...')}
-                        </Markdown>
+                        <SafeMarkdown>{String(item.question_text ?? 'Question content loading...')}</SafeMarkdown>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

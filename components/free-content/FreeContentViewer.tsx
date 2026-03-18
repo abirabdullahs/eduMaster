@@ -1,11 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
-import 'katex/dist/katex.min.css';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
 import { cn } from '@/lib/utils';
 import LatexRenderer from '@/components/shared/LatexRenderer';
 import type { FreeContentType } from '@/lib/types';
@@ -26,9 +22,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
     case 'markdown':
       return (
         <div className="prose prose-invert prose-indigo max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
-            {String(data.body ?? '')}
-          </ReactMarkdown>
+          <SafeMarkdown>{String(data.body ?? '')}</SafeMarkdown>
           {onMarkComplete && !isCompleted && (
             <button
               onClick={onMarkComplete}
@@ -100,7 +94,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
           {data.caption && <p className="text-slate-400">{data.caption}</p>}
           {data.description && (
             <div className="prose prose-invert prose-sm">
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>{String(data.description ?? '')}</ReactMarkdown>
+              <SafeMarkdown>{String(data.description ?? '')}</SafeMarkdown>
             </div>
           )}
           {onMarkComplete && !isCompleted && (
@@ -119,7 +113,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
           </div>
           {data.explanation && (
             <div className="prose prose-invert prose-sm">
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>{String(data.explanation ?? '')}</ReactMarkdown>
+              <SafeMarkdown>{String(data.explanation ?? '')}</SafeMarkdown>
             </div>
           )}
           {onMarkComplete && !isCompleted && (

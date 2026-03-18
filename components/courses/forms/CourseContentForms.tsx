@@ -8,11 +8,7 @@ import { X, Loader2, Save, Plus, FileText, Video, BookOpen, FolderOpen } from 'l
 import { cn } from '@/lib/utils';
 
 // Markdown editor - use textarea + preview (avoids SSR/type issues with @uiw/react-md-editor)
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
-import 'katex/dist/katex.min.css';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
 
 const subjectSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -290,9 +286,7 @@ export function LectureForm({ isOpen, onClose, onSubmit, initialData }: Omit<For
               <div>
                 <p className="text-[10px] text-slate-500 mb-1">Preview</p>
                 <div className="h-[320px] bg-[#0d1117] border border-slate-800 rounded-2xl p-4 overflow-y-auto prose prose-sm prose-invert prose-indigo max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
-                    {String(content ?? '_Preview will appear here_')}
-                  </ReactMarkdown>
+                  <SafeMarkdown>{String(content ?? '_Preview will appear here_')}</SafeMarkdown>
                 </div>
               </div>
             </div>

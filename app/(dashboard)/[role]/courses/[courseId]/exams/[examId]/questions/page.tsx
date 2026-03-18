@@ -21,11 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Question, Exam } from '@/lib/types';
 import QuestionForm from '@/components/exams/QuestionForm';
-import Markdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
-import 'katex/dist/katex.min.css';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
 
 export default function ExamQuestionsPage() {
   const [exam, setExam] = useState<Exam | null>(null);
@@ -219,9 +215,7 @@ export default function ExamQuestionsPage() {
                     <div className="flex-1 space-y-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="prose prose-invert prose-sm max-w-none">
-                          <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
-                            {String(question.question_text ?? '')}
-                          </Markdown>
+                          <SafeMarkdown>{String(question.question_text ?? '')}</SafeMarkdown>
                         </div>
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
                           <button 

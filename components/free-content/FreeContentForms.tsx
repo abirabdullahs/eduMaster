@@ -7,11 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { X, Loader2, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
-import 'katex/dist/katex.min.css';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
 import type { FreeContentType } from '@/lib/types';
 
 const baseSchema = z.object({ title: z.string().min(1, 'Title required') });
@@ -89,9 +85,7 @@ export default function FreeContentForms({ topicId, contentType, initialData, on
                 placeholder="# Heading..."
               />
               <div className="mt-2 p-4 bg-[#0d1117] rounded-xl prose prose-invert prose-sm max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
-                  {String(formData.body ?? '_Preview_')}
-                </ReactMarkdown>
+                <SafeMarkdown>{String(formData.body ?? '_Preview_')}</SafeMarkdown>
               </div>
             </div>
           </div>
