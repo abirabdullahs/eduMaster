@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ courseId:
   const { data: course } = await supabase.from('courses').select('title, description, thumbnail_url').eq('id', courseId).single()
   
   return {
-    title: `${course?.title || 'Course'} | EduMaster`,
+    title: `${course?.title || 'Course'} | Radiance`,
     description: course?.description || 'Learn more about this course.',
     openGraph: {
       images: [course?.thumbnail_url || '/og-image.png'],

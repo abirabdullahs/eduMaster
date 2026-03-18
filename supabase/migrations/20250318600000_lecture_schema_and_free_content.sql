@@ -67,9 +67,13 @@ CREATE TABLE IF NOT EXISTS free_subjects (
   name TEXT NOT NULL,
   description TEXT,
   thumbnail_url TEXT,
+  language TEXT DEFAULT 'bangla',
   order_index INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Add language column if table already exists
+ALTER TABLE free_subjects ADD COLUMN IF NOT EXISTS language TEXT DEFAULT 'bangla';
 
 CREATE TABLE IF NOT EXISTS free_chapters (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

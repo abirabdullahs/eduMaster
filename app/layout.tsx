@@ -17,14 +17,14 @@ const hindSiliguri = Hind_Siliguri({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "EduMaster | Advanced EdTech Platform",
-    template: "%s | EduMaster"
+    default: "Radiance | Advanced EdTech Platform",
+    template: "%s | Radiance"
   },
   description: "The most advanced EdTech platform for SSC and HSC students in Bangladesh. Quality education, interactive exams, and expert instructors.",
   keywords: ["SSC", "HSC", "Education", "Online Course", "Exam", "Bangladesh", "Learning"],
-  authors: [{ name: "EduMaster Team" }],
-  creator: "EduMaster",
-  publisher: "EduMaster",
+  authors: [{ name: "Radiance Team" }],
+  creator: "Radiance",
+  publisher: "Radiance",
   formatDetection: {
     email: false,
     address: false,
@@ -33,22 +33,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://edumaster.com",
-    siteName: "EduMaster",
-    title: "EduMaster | Advanced EdTech Platform",
+    url: "https://radiance.com",
+    siteName: "Radiance",
+    title: "Radiance | Advanced EdTech Platform",
     description: "The most advanced EdTech platform for SSC and HSC students in Bangladesh.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "EduMaster Platform",
+        alt: "Radiance Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "EduMaster | Advanced EdTech Platform",
+    title: "Radiance | Advanced EdTech Platform",
     description: "The most advanced EdTech platform for SSC and HSC students in Bangladesh.",
     images: ["/og-image.png"],
   },

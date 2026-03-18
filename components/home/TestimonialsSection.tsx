@@ -4,7 +4,7 @@ const testimonials = [
   {
     name: 'আরিফ আহমেদ',
     class: 'HSC 2025',
-    quote: 'EduMaster এর ক্লাসগুলো অসাধারণ। বিশেষ করে ফিজিক্সের কঠিন বিষয়গুলো এখানে খুব সহজে বোঝানো হয়েছে।',
+    quote: 'Radiance এর ক্লাসগুলো অসাধারণ। বিশেষ করে ফিজিক্সের কঠিন বিষয়গুলো এখানে খুব সহজে বোঝানো হয়েছে।',
     avatar: 'https://picsum.photos/seed/student1/100/100'
   },
   {
@@ -30,7 +30,7 @@ export default function TestimonialsSection() {
             শিক্ষার্থীদের <span className="text-indigo-500">মতামত</span>
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto font-poppins">
-            Hear from our successful students who have achieved their academic goals with EduMaster.
+            Hear from our successful students who have achieved their academic goals with Radiance.
           </p>
         </div>
 

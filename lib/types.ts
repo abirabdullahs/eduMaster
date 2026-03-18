@@ -213,12 +213,15 @@ export interface FreeClass {
   created_at?: string;
 }
 
+export type FreeContentLanguage = 'bangla' | 'hindi' | 'siliguri';
+
 export interface FreeSubject {
   id: string;
   class_id: string;
   name: string;
   description?: string;
   thumbnail_url?: string;
+  language?: FreeContentLanguage;
   order_index: number;
   created_at?: string;
 }

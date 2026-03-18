@@ -10,7 +10,7 @@ export default function FounderSection() {
           <h2 className="text-4xl md:text-5xl font-bold text-white font-hind-siliguri mb-4">
             Founder & <span className="text-indigo-500">CEO</span>
           </h2>
-          <p className="text-slate-400 max-w-xl mx-auto">Meet the visionary behind EduMaster</p>
+          <p className="text-slate-400 max-w-xl mx-auto">Meet the visionary behind Radiance</p>
         </div>
 
         <div className="glass-card p-8 md:p-12 flex flex-col md:flex-row gap-8 md:gap-12 items-center">

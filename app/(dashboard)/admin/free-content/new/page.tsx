@@ -11,10 +11,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { cn } from '@/lib/utils';
 
+const LANGUAGES = [
+  { value: 'bangla', label: 'বাংলা (Bangla)' },
+  { value: 'hindi', label: 'हिन्दी (Hindi)' },
+  { value: 'siliguri', label: 'Siliguri' },
+] as const;
+
 const schema = z.object({
   name: z.string().min(1, 'Name required'),
   description: z.string().optional(),
   thumbnail_url: z.string().url().optional().or(z.literal('')),
+  language: z.enum(['bangla', 'hindi', 'siliguri']).default('bangla'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -28,7 +35,7 @@ export default function NewFreeSubjectPage() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', description: '', thumbnail_url: '' },
+    defaultValues: { name: '', description: '', thumbnail_url: '', language: 'bangla' },
   });
 
   useEffect(() => {
@@ -49,6 +56,7 @@ export default function NewFreeSubjectPage() {
         name: data.name,
         description: data.description || null,
         thumbnail_url: data.thumbnail_url || null,
+        language: data.language || 'bangla',
         order_index: 999,
       })
       .select('id')
@@ -82,6 +90,17 @@ export default function NewFreeSubjectPage() {
               placeholder="e.g. Physics, Chemistry"
             />
             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">ভাষা / Language</label>
+            <select
+              {...register('language')}
+              className="w-full bg-[#0d1117] border border-slate-800 rounded-xl py-3 px-4 text-white"
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>

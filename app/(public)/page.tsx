@@ -33,7 +33,7 @@ export default function HomePage() {
                 <span className="text-indigo-200">সাফল্যের</span> যাত্রা
               </h2>
               <p className="text-lg md:text-xl text-indigo-100 max-w-2xl mx-auto font-poppins">
-                Join thousands of students who are already learning and growing with EduMaster. Your future starts here.
+                Join thousands of students who are already learning and growing with Radiance. Your future starts here.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <Link 

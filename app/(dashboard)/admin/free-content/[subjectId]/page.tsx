@@ -88,6 +88,8 @@ export default function AdminFreeSubjectPage() {
   const [contentForm, setContentForm] = useState<{ topicId: string; type: FreeContentType; content?: any } | null>(null);
   const [editingChapter, setEditingChapter] = useState<any | null>(null);
   const [editingTopic, setEditingTopic] = useState<{ topic: any; chapterId: string } | null>(null);
+  const [addingChapter, setAddingChapter] = useState(false);
+  const [addingTopic, setAddingTopic] = useState<{ chapterId: string } | null>(null);
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
@@ -131,23 +133,9 @@ export default function AdminFreeSubjectPage() {
     fetchData();
   }, [fetchData]);
 
-  const handleAddChapter = async () => {
-    const { data, error } = await supabase
-      .from('free_chapters')
-      .insert({ subject_id: subjectId, name: 'New Chapter', order_index: chapters.length })
-      .select('id')
-      .single();
-    if (!error) fetchData();
-  };
+  const handleAddChapter = () => setAddingChapter(true);
 
-  const handleAddTopic = async (chapterId: string) => {
-    const ch = chapters.find(c => c.id === chapterId);
-    const len = ch?.topics?.length ?? 0;
-    const { error } = await supabase
-      .from('free_topics')
-      .insert({ chapter_id: chapterId, name: 'New Topic', order_index: len });
-    if (!error) fetchData();
-  };
+  const handleAddTopic = (chapterId: string) => setAddingTopic({ chapterId });
 
   const handleSelectContentType = (topicId: string, type: FreeContentType) => {
     setContentTypeModal(null);
@@ -262,6 +250,44 @@ export default function AdminFreeSubjectPage() {
             const { error } = await supabase.from('free_topics').update({ name }).eq('id', editingTopic.topic.id);
             if (!error) {
               setEditingTopic(null);
+              fetchData();
+            } else throw new Error(error.message);
+          }}
+        />
+      )}
+
+      {/* Add Chapter Modal - নাম দিয়ে add */}
+      {addingChapter && (
+        <EditChapterTopicModal
+          title="Add Chapter"
+          initialName=""
+          onClose={() => setAddingChapter(false)}
+          onSave={async (name: string) => {
+            const { error } = await supabase
+              .from('free_chapters')
+              .insert({ subject_id: subjectId, name, order_index: chapters.length });
+            if (!error) {
+              setAddingChapter(false);
+              fetchData();
+            } else throw new Error(error.message);
+          }}
+        />
+      )}
+
+      {/* Add Topic Modal - নাম দিয়ে add */}
+      {addingTopic && (
+        <EditChapterTopicModal
+          title="Add Topic"
+          initialName=""
+          onClose={() => setAddingTopic(null)}
+          onSave={async (name: string) => {
+            const ch = chapters.find(c => c.id === addingTopic.chapterId);
+            const len = ch?.topics?.length ?? 0;
+            const { error } = await supabase
+              .from('free_topics')
+              .insert({ chapter_id: addingTopic.chapterId, name, order_index: len });
+            if (!error) {
+              setAddingTopic(null);
               fetchData();
             } else throw new Error(error.message);
           }}

@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { Mail, Phone, MessageCircle, BookOpen } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Support | EduMaster',
-  description: 'Get help and support for EduMaster educational platform.',
+  title: 'Support | Radiance',
+  description: 'Get help and support for Radiance educational platform.',
 };
 
 export default function SupportPage() {

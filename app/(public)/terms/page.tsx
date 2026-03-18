@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions | EduMaster',
-  description: 'Terms and conditions for using EduMaster educational platform.',
+  title: 'Terms & Conditions | Radiance',
+  description: 'Terms and conditions for using Radiance educational platform.',
 };
 
 export default function TermsPage() {
@@ -19,7 +19,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
             <p className="text-slate-400 leading-relaxed">
-              By accessing and using EduMaster (&quot;the Platform&quot;), you accept and agree to be bound by these Terms and Conditions. 
+              By accessing and using Radiance (&quot;the Platform&quot;), you accept and agree to be bound by these Terms and Conditions. 
               If you do not agree with any part of these terms, please do not use our platform.
             </p>
           </section>
@@ -27,7 +27,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-white mb-4">2. Use of Service</h2>
             <p className="text-slate-400 leading-relaxed">
-              EduMaster provides online educational content for SSC and HSC students in Bangladesh. You agree to use the service 
+              Radiance provides online educational content for SSC and HSC students in Bangladesh. You agree to use the service 
               only for lawful purposes and in accordance with these terms. You must provide accurate information during registration 
               and maintain the confidentiality of your account credentials.
             </p>
@@ -45,8 +45,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-white mb-4">4. Intellectual Property</h2>
             <p className="text-slate-400 leading-relaxed">
-              All content, including videos, materials, and course content on EduMaster, is protected by copyright. You may not 
-              copy, distribute, or share course materials without prior written permission from EduMaster.
+              All content, including videos, materials, and course content on Radiance, is protected by copyright. You may not 
+              copy, distribute, or share course materials without prior written permission from Radiance.
             </p>
           </section>
 

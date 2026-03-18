@@ -15,7 +15,7 @@ export default function ContactPage() {
     const name = (form.elements.namedItem('name') as HTMLInputElement)?.value || '';
     const email = (form.elements.namedItem('email') as HTMLInputElement)?.value || '';
     const message = (form.elements.namedItem('message') as HTMLTextAreaElement)?.value || '';
-    const subject = encodeURIComponent(`EduMaster Support: ${name}`);
+    const subject = encodeURIComponent(`Radiance Support: ${name}`);
     const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
     window.location.href = `mailto:contact@abirabdullah.me?subject=${subject}&body=${body}`;
     setFormState('sent');

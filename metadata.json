@@ -1,5 +1,5 @@
 {
-  "name": "EduMaster",
+  "name": "Radiance",
   "description": "Advanced EdTech platform for SSC and HSC students with role-based dashboards, interactive exams, and LaTeX support.",
   "requestFramePermissions": ["camera", "microphone"]
 }

@@ -11,7 +11,7 @@ export default function Footer() {
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <span className="text-white font-bold text-xl">E</span>
             </div>
-            <span className="text-white font-bold text-xl tracking-tight">EduMaster</span>
+            <span className="text-white font-bold text-xl tracking-tight">Radiance</span>
           </Link>
           <p className="text-slate-400 text-sm leading-relaxed">
             বাংলাদেশের সেরা অনলাইন লার্নিং প্ল্যাটফর্ম। SSC ও HSC শিক্ষার্থীদের জন্য মানসম্মত শিক্ষা নিশ্চিত করাই আমাদের লক্ষ্য।
@@ -81,7 +81,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto border-t border-white/5 pt-8 text-center">
         <p className="text-slate-500 text-xs">
-          © {new Date().getFullYear()} EduMaster. All rights reserved. Developed with ❤️ by <a href="https://abirabdullah.me" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">abirabdullah</a>
+          © {new Date().getFullYear()} Radiance. All rights reserved. Developed with ❤️ by <a href="https://abirabdullah.me" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">abirabdullah</a>
         </p>
       </div>
     </footer>

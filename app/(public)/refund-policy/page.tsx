@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Refund Policy | EduMaster',
-  description: 'Refund policy for EduMaster course enrollments.',
+  title: 'Refund Policy | Radiance',
+  description: 'Refund policy for Radiance course enrollments.',
 };
 
 export default function RefundPolicyPage() {

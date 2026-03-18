@@ -72,7 +72,7 @@ export default function Navbar() {
           <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <span className="text-white font-bold text-xl">E</span>
           </div>
-          <span className="text-white font-bold text-xl tracking-tight">EduMaster</span>
+          <span className="text-white font-bold text-xl tracking-tight">Radiance</span>
         </Link>
 
         {/* Desktop Nav */}

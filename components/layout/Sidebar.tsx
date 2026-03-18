@@ -96,7 +96,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
           <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">E</span>
           </div>
-          <span className="text-white font-bold text-lg tracking-tight">EduMaster</span>
+          <span className="text-white font-bold text-lg tracking-tight">Radiance</span>
         </Link>
       </div>
 

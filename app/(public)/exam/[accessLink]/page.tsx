@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ accessLin
   const { data: exam } = await supabase.from('exams').select('title').eq('access_link', accessLink).single()
   
   return {
-    title: `${exam?.title || 'Exam'} | EduMaster`,
+    title: `${exam?.title || 'Exam'} | Radiance`,
     description: 'Take this exam to test your knowledge and track your progress.',
   }
 }

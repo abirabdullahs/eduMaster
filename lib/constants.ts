@@ -1,4 +1,4 @@
-export const APP_NAME = "EduMaster"
+export const APP_NAME = "Radiance"
 export const ROLES = {
   STUDENT: 'student',
   TEACHER: 'teacher',
