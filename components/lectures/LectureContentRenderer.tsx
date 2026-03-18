@@ -43,7 +43,8 @@ export default function LectureContentRenderer({
 
   return (
     <div 
-      className="lecture-html-content prose prose-invert prose-indigo max-w-none prose-p:text-slate-300 prose-headings:text-white prose-strong:text-white prose-a:text-indigo-400 prose-li:text-slate-300 prose-code:text-indigo-400 prose-pre:bg-slate-900"
+      className="lecture-html-content prose prose-sm sm:prose-base prose-invert prose-indigo max-w-none prose-p:text-slate-300 prose-headings:text-white prose-strong:text-white prose-a:text-indigo-400 prose-li:text-slate-300 prose-code:text-indigo-400 prose-pre:bg-slate-900 prose-img:max-w-full prose-img:h-auto prose-img:w-auto [&_img]:max-w-full [&_img]:h-auto [&_iframe]:max-w-full [&_iframe]:w-full [&_table]:block [&_table]:overflow-x-auto [&_table]:max-w-full [&_pre]:overflow-x-auto [&_pre]:max-w-full overflow-x-auto w-full"
+      style={{ wordBreak: 'break-word' } as React.CSSProperties}
       dangerouslySetInnerHTML={{ __html: html }}
       suppressHydrationWarning
     />

@@ -30,7 +30,7 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
   const [subjects, setSubjects] = useState<any[]>([]);
   const [progress, setProgress] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Will be toggled: on mobile start closed via useEffect
   const [selectedLecture, setSelectedLecture] = useState<Lecture | null>(null);
   const [currentChapter, setCurrentChapter] = useState<any>(null);
   const [completing, setCompleting] = useState(false);
@@ -103,6 +103,11 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
     fetchData();
   }, [fetchData]);
 
+  // On mobile, start with sidebar closed for more content space; on desktop keep it open
+  useEffect(() => {
+    setSidebarOpen(window.innerWidth >= 1024);
+  }, []);
+
   const handleMarkComplete = async () => {
     if (!selectedLecture) return;
     setCompleting(true);
@@ -159,13 +164,21 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
 
   return (
     <DashboardShell>
-      <div className="flex h-[calc(100vh-120px)] -m-8 relative overflow-hidden font-bengali">
+      <div className="flex min-h-[calc(100dvh-80px)] -m-4 sm:-m-6 md:-m-8 relative overflow-hidden font-bengali max-w-full">
+        {/* Mobile sidebar backdrop */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden" 
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
         {/* Sidebar: Content Tree */}
         <div className={cn(
-          "bg-[#161b22] border-r border-slate-800 transition-all duration-300 flex flex-col absolute lg:relative z-20 h-full",
-          sidebarOpen ? "w-80 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-0 overflow-hidden"
+          "bg-[#161b22] border-r border-slate-800 transition-all duration-300 flex flex-col fixed inset-y-0 left-0 lg:relative lg:inset-auto z-30 lg:z-auto h-[100dvh] lg:h-full",
+          sidebarOpen ? "w-[min(320px,85vw)] translate-x-0 lg:w-72" : "w-0 -translate-x-full lg:translate-x-0 lg:w-72 overflow-hidden"
         )}>
-          <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <div className="p-4 sm:p-6 border-b border-slate-800 flex items-center justify-between">
             <h3 className="font-bold text-white flex items-center gap-2">
               <BookOpen size={18} className="text-indigo-500" />
               কোর্স কন্টেন্ট
@@ -174,7 +187,7 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
               <X size={20} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 overscroll-contain">
             {subjects.map((subject) => (
               <div key={subject.id} className="space-y-2">
                 <div className="px-3 py-2 bg-slate-800/50 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -221,36 +234,34 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col bg-[#0d1117] overflow-y-auto">
           {/* Top Bar */}
-          <div className="sticky top-0 z-10 bg-[#0d1117]/80 backdrop-blur-md border-b border-slate-800 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="sticky top-0 z-10 bg-[#0d1117]/95 backdrop-blur-md border-b border-slate-800 p-3 sm:p-4 flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               <button 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 bg-[#161b22] border border-slate-800 rounded-xl text-slate-400 hover:text-white transition-all"
+                className="shrink-0 p-2 bg-[#161b22] border border-slate-800 rounded-xl text-slate-400 hover:text-white transition-all"
               >
-                <Menu size={20} />
+                <Menu size={18} className="sm:w-5 sm:h-5" />
               </button>
-              <div className="space-y-0.5">
-                <h2 className="text-sm font-bold text-white line-clamp-1">{selectedLecture?.title || 'Lecture Content'}</h2>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{course?.title}</p>
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <h2 className="text-xs sm:text-sm font-bold text-white line-clamp-2 truncate">{selectedLecture?.title || 'Lecture Content'}</h2>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{course?.title}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Link 
-                href={`/student/courses/${courseId}`}
-                className="px-4 py-2 bg-[#161b22] border border-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2"
-              >
-                <ArrowLeft size={14} />
-                Course Home
-              </Link>
-            </div>
+            <Link 
+              href={`/student/courses/${courseId}`}
+              className="shrink-0 px-3 py-2 sm:px-4 bg-[#161b22] border border-slate-800 text-slate-400 hover:text-white rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 sm:gap-2"
+            >
+              <ArrowLeft size={14} />
+              <span className="hidden sm:inline">Course Home</span>
+            </Link>
           </div>
 
           {/* Content */}
           {selectedLecture ? (
-            <div className="p-8 max-w-5xl mx-auto w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="p-4 sm:p-6 md:p-8 max-w-5xl mx-auto w-full space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-x-hidden">
               {/* Video Player */}
               {selectedLecture.video_url && (
-                <div className="aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+                <div className="aspect-video bg-black rounded-xl sm:rounded-3xl overflow-hidden shadow-xl border border-slate-800 w-full max-w-full">
                   <iframe 
                     src={selectedLecture.video_url.replace('watch?v=', 'embed/')}
                     className="w-full h-full"
@@ -260,11 +271,11 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
               )}
 
               {/* Lecture Info */}
-              <div className="space-y-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <h1 className="text-3xl font-bold text-white tracking-tight">{selectedLecture.title}</h1>
-                    <div className="flex flex-wrap gap-3">
+              <div className="space-y-6 sm:space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+                  <div className="space-y-2 min-w-0">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight break-words">{selectedLecture.title}</h1>
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
                       {selectedLecture.topics?.split(',').map((topic, i) => (
                         <span key={i} className="px-3 py-1 bg-indigo-500/10 text-indigo-400 text-[10px] font-bold rounded-lg uppercase tracking-widest">
                           {topic.trim()}
@@ -286,7 +297,7 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
                     onClick={handleMarkComplete}
                     disabled={completing || progress.has(selectedLecture.id)}
                     className={cn(
-                      "px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 shadow-lg",
+                      "w-full md:w-auto shrink-0 px-6 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg text-sm sm:text-base",
                       progress.has(selectedLecture.id)
                         ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 cursor-default"
                         : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20"
@@ -310,7 +321,7 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
 
                 {/* HTML Content - rendered as live page, not raw code */}
                 {(selectedLecture.content_html || (selectedLecture as any).content) && (
-                  <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-8 shadow-xl">
+                  <div className="bg-[#161b22] border border-slate-800 rounded-xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl overflow-x-auto min-h-[120px]">
                     <LectureContentRenderer 
                       content={selectedLecture.content_html || (selectedLecture as any).content} 
                     />
@@ -318,18 +329,18 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
                 )}
 
                 {/* Navigation */}
-                <div className="flex items-center justify-between pt-10 border-t border-slate-800">
+                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 sm:pt-10 border-t border-slate-800">
                   {nav.prev ? (
                     <Link 
                       href={`/student/courses/${courseId}/lecture/${nav.prev.id}`}
-                      className="flex items-center gap-4 group"
+                      className="flex items-center gap-3 sm:gap-4 group min-w-0"
                     >
-                      <div className="w-12 h-12 bg-[#161b22] border border-slate-800 rounded-2xl flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all">
-                        <ChevronLeft size={24} />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-[#161b22] border border-slate-800 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all">
+                        <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
                       </div>
-                      <div className="space-y-0.5">
+                      <div className="space-y-0.5 min-w-0">
                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Previous</p>
-                        <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{nav.prev.title}</p>
+                        <p className="text-xs sm:text-sm font-bold text-white group-hover:text-indigo-400 transition-colors line-clamp-1">{nav.prev.title}</p>
                       </div>
                     </Link>
                   ) : <div />}
@@ -337,14 +348,14 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
                   {nav.next ? (
                     <Link 
                       href={`/student/courses/${courseId}/lecture/${nav.next.id}`}
-                      className="flex items-center gap-4 text-right group"
+                      className="flex items-center gap-3 sm:gap-4 text-right group min-w-0 sm:flex-row-reverse"
                     >
-                      <div className="space-y-0.5">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Next</p>
-                        <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{nav.next.title}</p>
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-[#161b22] border border-slate-800 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all">
+                        <ChevronRight size={20} className="sm:w-6 sm:h-6" />
                       </div>
-                      <div className="w-12 h-12 bg-[#161b22] border border-slate-800 rounded-2xl flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all">
-                        <ChevronRight size={24} />
+                      <div className="space-y-0.5 min-w-0 flex-1 text-right">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Next</p>
+                        <p className="text-xs sm:text-sm font-bold text-white group-hover:text-indigo-400 transition-colors line-clamp-1">{nav.next.title}</p>
                       </div>
                     </Link>
                   ) : <div />}
