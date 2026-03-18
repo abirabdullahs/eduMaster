@@ -218,7 +218,7 @@ export default function ExamQuestionsPage() {
                     <div className="flex-1 space-y-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="prose prose-invert prose-sm max-w-none">
-                          <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>
+                          <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore' })]}>
                             {question.question_text}
                           </Markdown>
                         </div>

@@ -88,7 +88,7 @@ export default function FreeContentForms({ topicId, contentType, initialData, on
                 placeholder="# Heading..."
               />
               <div className="mt-2 p-4 bg-[#0d1117] rounded-xl prose prose-invert prose-sm max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>
+                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore' })]}>
                   {formData.body || '_Preview_'}
                 </ReactMarkdown>
               </div>

@@ -289,7 +289,7 @@ export function LectureForm({ isOpen, onClose, onSubmit, initialData }: Omit<For
               <div>
                 <p className="text-[10px] text-slate-500 mb-1">Preview</p>
                 <div className="h-[320px] bg-[#0d1117] border border-slate-800 rounded-2xl p-4 overflow-y-auto prose prose-sm prose-invert prose-indigo max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>
+                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore' })]}>
                     {content || '_Preview will appear here_'}
                   </ReactMarkdown>
                 </div>

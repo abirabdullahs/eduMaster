@@ -112,7 +112,7 @@ export default function ResultCard({ result, exam, onRetry, isPractice }: Result
                     </div>
                     <div className="flex-1 space-y-4">
                       <div className="prose prose-invert prose-sm max-w-none">
-                        <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>
+                        <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore' })]}>
                           {item.question_text || 'Question content loading...'}
                         </Markdown>
                       </div>

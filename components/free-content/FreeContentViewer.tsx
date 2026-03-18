@@ -25,7 +25,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
     case 'markdown':
       return (
         <div className="prose prose-invert prose-indigo max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>
+          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore' })]}>
             {data.body || ''}
           </ReactMarkdown>
           {onMarkComplete && !isCompleted && (
@@ -99,7 +99,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
           {data.caption && <p className="text-slate-400">{data.caption}</p>}
           {data.description && (
             <div className="prose prose-invert prose-sm">
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>{data.description}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore' })]}>{data.description}</ReactMarkdown>
             </div>
           )}
           {onMarkComplete && !isCompleted && (
@@ -118,7 +118,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
           </div>
           {data.explanation && (
             <div className="prose prose-invert prose-sm">
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>{data.explanation}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore' })]}>{data.explanation}</ReactMarkdown>
             </div>
           )}
           {onMarkComplete && !isCompleted && (
