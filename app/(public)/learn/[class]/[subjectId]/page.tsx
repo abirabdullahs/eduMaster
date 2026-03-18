@@ -17,7 +17,7 @@ export default function LearnSubjectPage() {
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
   const [contents, setContents] = useState<any[]>([]);
   const [contentIndex, setContentIndex] = useState(0);
-  const [progress, setProgress] = useState<Record<string, string>>({});
+  const [progress, setProgress] = useState<Record<string, { status: string; answer_given?: string; is_correct?: boolean }>>({});
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -82,13 +82,13 @@ export default function LearnSubjectPage() {
     if (!selectedTopic || !user) return;
     fetch(`/api/free-content/progress?topic_id=${selectedTopic.id}`)
       .then(r => r.json())
-      .then(d => setProgress(d.progress || {}))
+      .then(d => setProgress(Array.isArray(d.progress) ? {} : (d.progress || {})))
       .catch(() => {});
   }, [selectedTopic?.id, user]);
 
   const currentContent = contents[contentIndex];
   const isGuest = !user;
-  const showBlur = isGuest && contentIndex >= 3 && currentContent?.is_free_preview === false;
+  const showBlur = isGuest && contentIndex >= 3;
 
   const handleMarkComplete = async () => {
     if (!user || !currentContent) return;
@@ -101,11 +101,11 @@ export default function LearnSubjectPage() {
         answer_given: null,
       }),
     });
-    setProgress(p => ({ ...p, [currentContent.id]: 'completed' }));
+    setProgress(p => ({ ...p, [currentContent.id]: { status: 'completed' } }));
     if (contentIndex < contents.length - 1) setContentIndex(i => i + 1);
   };
 
-  const handleMcqSubmit = async (answer: string) => {
+  const handleAnswerSubmit = async (answer: string, isCorrect?: boolean) => {
     if (!user || !currentContent) return;
     await fetch('/api/free-content/progress', {
       method: 'POST',
@@ -114,9 +114,13 @@ export default function LearnSubjectPage() {
         content_id: currentContent.id,
         status: 'completed',
         answer_given: answer,
+        is_correct: isCorrect,
       }),
     });
-    setProgress(p => ({ ...p, [currentContent.id]: 'completed' }));
+    setProgress(p => ({
+      ...p,
+      [currentContent.id]: { status: 'completed', answer_given: answer, is_correct: isCorrect },
+    }));
     if (contentIndex < contents.length - 1) setContentIndex(i => i + 1);
   };
 
@@ -158,7 +162,9 @@ export default function LearnSubjectPage() {
                       selectedTopic?.id === t.id ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-white/5"
                     )}
                   >
-                    {progress[t.id] === 'completed' ? <CheckCircle2 size={14} className="text-emerald-500" /> : null}
+                    {t.id === selectedTopic?.id && contents.length > 0 && contents.every((c: any) => progress[c.id]?.status === 'completed') ? (
+                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    ) : null}
                     {t.name}
                   </button>
                 ))}
@@ -221,27 +227,51 @@ export default function LearnSubjectPage() {
                   <FreeContentViewer
                     content={currentContent}
                     onMarkComplete={handleMarkComplete}
-                    onSubmitAnswer={handleMcqSubmit}
-                    isCompleted={progress[currentContent?.id] === 'completed'}
+                    onSubmitAnswer={handleAnswerSubmit}
+                    isCompleted={progress[currentContent?.id]?.status === 'completed'}
+                    previousAnswer={progress[currentContent?.id]?.answer_given}
+                    isCorrect={progress[currentContent?.id]?.is_correct}
                   />
                 </div>
 
-                <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-800">
-                  <button
-                    onClick={() => setContentIndex(i => Math.max(0, i - 1))}
-                    disabled={contentIndex === 0}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#161b22] text-slate-400 hover:text-white disabled:opacity-50"
-                  >
-                    <ChevronLeft size={18} /> Previous
-                  </button>
-                  <span className="text-sm text-slate-500">{contentIndex + 1} / {contents.length}</span>
-                  <button
-                    onClick={() => setContentIndex(i => Math.min(contents.length - 1, i + 1))}
-                    disabled={contentIndex === contents.length - 1}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#161b22] text-slate-400 hover:text-white disabled:opacity-50"
-                  >
-                    Next <ChevronRight size={18} />
-                  </button>
+                <div className="mt-10 pt-6 border-t border-slate-800 space-y-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500">
+                      {contents.filter((c: any) => progress[c.id]?.status === 'completed').length} / {contents.length} completed
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSidebarOpen(true)}
+                      className="text-indigo-400 hover:text-indigo-300 font-medium"
+                    >
+                      See All Topics
+                    </button>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-500 transition-all duration-300"
+                      style={{
+                        width: `${(contents.filter((c: any) => progress[c.id]?.status === 'completed').length / contents.length) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => setContentIndex(i => Math.max(0, i - 1))}
+                      disabled={contentIndex === 0}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#161b22] text-slate-400 hover:text-white disabled:opacity-50"
+                    >
+                      <ChevronLeft size={18} /> Previous
+                    </button>
+                    <span className="text-sm text-slate-500">{contentIndex + 1} / {contents.length}</span>
+                    <button
+                      onClick={() => setContentIndex(i => Math.min(contents.length - 1, i + 1))}
+                      disabled={contentIndex === contents.length - 1}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#161b22] text-slate-400 hover:text-white disabled:opacity-50"
+                    >
+                      Next <ChevronRight size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { content_id, status, answer_given } = body;
+    const { content_id, status, answer_given, is_correct } = body;
 
     if (!content_id) {
       return NextResponse.json({ error: 'content_id required' }, { status: 400 });
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       content_id,
       status: status || 'completed',
       answer_given: answer_given ?? null,
+      is_correct: is_correct ?? null,
       completed_at: new Date().toISOString(),
     }, { onConflict: 'user_id,content_id' });
 
@@ -50,12 +51,18 @@ export async function GET(req: NextRequest) {
 
     const { data: progress } = await supabase
       .from('free_content_progress')
-      .select('content_id, status')
+      .select('content_id, status, answer_given, is_correct')
       .eq('user_id', user.id)
       .in('content_id', ids);
 
-    const map: Record<string, string> = {};
-    (progress || []).forEach(p => { map[p.content_id] = p.status; });
+    const map: Record<string, { status: string; answer_given?: string; is_correct?: boolean }> = {};
+    (progress || []).forEach(p => {
+      map[p.content_id] = {
+        status: p.status,
+        answer_given: p.answer_given ?? undefined,
+        is_correct: p.is_correct ?? undefined,
+      };
+    });
     return NextResponse.json({ progress: map });
   } catch {
     return NextResponse.json({ progress: [] });
