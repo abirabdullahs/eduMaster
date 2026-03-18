@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import DashboardShell from '@/components/layout/DashboardShell';
 import ContentTree from '@/components/courses/ContentTree';
+import LectureQuestions from '@/components/courses/LectureQuestions';
 import { SubjectForm, ChapterForm, LectureForm } from '@/components/courses/forms/CourseContentForms';
 import { 
   Loader2, 
@@ -46,6 +47,8 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
   const [announcement, setAnnouncement] = useState({ title: '', body: '' });
   const [sending, setSending] = useState(false);
   const [editingItem, setEditingItem] = useState<{ type: 'subject' | 'chapter' | 'lecture', data: any } | null>(null);
+  const [isQuestionsModalOpen, setIsQuestionsModalOpen] = useState(false);
+  const [selectedLecture, setSelectedLecture] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -345,7 +348,10 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
               onDelete={handleDelete}
               onAddChild={(type, parentId) => type === 'chapter' ? setIsAddingChapter(parentId) : setIsAddingLecture(parentId)}
               onReorder={handleReorder}
-              onManageQuestions={(lecture) => router.push(`/teacher/courses/${courseId}/lectures/${lecture.id}/questions`)}
+              onManageQuestions={(lecture) => {
+                setSelectedLecture(lecture);
+                setIsQuestionsModalOpen(true);
+              }}
             />
             {subjects.length === 0 && (
               <div className="p-20 bg-[#161b22] border border-dashed border-slate-800 rounded-3xl text-center space-y-4">
@@ -555,6 +561,16 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
               }}
             />
           )
+        )}
+
+        {isQuestionsModalOpen && selectedLecture && (
+          <LectureQuestions 
+            lecture={selectedLecture}
+            onClose={() => {
+              setIsQuestionsModalOpen(false);
+              setSelectedLecture(null);
+            }}
+          />
         )}
       </div>
     </DashboardShell>

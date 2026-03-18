@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import LectureContentRenderer from '@/components/lectures/LectureContentRenderer';
 import { Course, Subject, Chapter, Lecture, LectureProgress } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
@@ -307,12 +308,11 @@ export default function StudentLecturePage({ params }: { params: Promise<{ cours
                   </button>
                 </div>
 
-                {/* HTML Content */}
-                {selectedLecture.content_html && (
+                {/* HTML Content - rendered as live page, not raw code */}
+                {(selectedLecture.content_html || (selectedLecture as any).content) && (
                   <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-8 shadow-xl">
-                    <div 
-                      className="prose prose-invert prose-indigo max-w-none prose-p:text-slate-300 prose-headings:text-white prose-strong:text-white prose-a:text-indigo-400"
-                      dangerouslySetInnerHTML={{ __html: selectedLecture.content_html }}
+                    <LectureContentRenderer 
+                      content={selectedLecture.content_html || (selectedLecture as any).content} 
                     />
                   </div>
                 )}
