@@ -19,6 +19,7 @@ import { Exam, Question, OptionChoice } from '@/lib/types';
 import Markdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
 import 'katex/dist/katex.min.css';
 import ExamTimer from './ExamTimer';
 import ResultCard from './ResultCard';
@@ -243,8 +244,8 @@ export default function ExamPlayer({ exam, isPractice, practiceDuration, onCompl
                 </div>
                 <div className="flex-1 space-y-6">
                   <div className="prose prose-invert prose-lg max-w-none font-medium text-white">
-                    <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex()]}>
-                      {currentQuestion.question_text}
+                    <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
+                      {String(currentQuestion?.question_text ?? '')}
                     </Markdown>
                   </div>
                   {currentQuestion.question_image_url && (

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
 import 'katex/dist/katex.min.css';
 import { cn } from '@/lib/utils';
 import LatexRenderer from '@/components/shared/LatexRenderer';
@@ -25,8 +26,8 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
     case 'markdown':
       return (
         <div className="prose prose-invert prose-indigo max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex()]}>
-            {data.body || ''}
+          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
+            {String(data.body ?? '')}
           </ReactMarkdown>
           {onMarkComplete && !isCompleted && (
             <button
@@ -99,7 +100,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
           {data.caption && <p className="text-slate-400">{data.caption}</p>}
           {data.description && (
             <div className="prose prose-invert prose-sm">
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex()]}>{data.description}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>{String(data.description ?? '')}</ReactMarkdown>
             </div>
           )}
           {onMarkComplete && !isCompleted && (
@@ -118,7 +119,7 @@ export default function FreeContentViewer({ content, onMarkComplete, onSubmitAns
           </div>
           {data.explanation && (
             <div className="prose prose-invert prose-sm">
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex()]}>{data.explanation}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>{String(data.explanation ?? '')}</ReactMarkdown>
             </div>
           )}
           {onMarkComplete && !isCompleted && (

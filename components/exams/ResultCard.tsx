@@ -18,6 +18,7 @@ import { Exam, Question } from '@/lib/types';
 import Markdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
 import 'katex/dist/katex.min.css';
 import confetti from 'canvas-confetti';
 
@@ -112,8 +113,8 @@ export default function ResultCard({ result, exam, onRetry, isPractice }: Result
                     </div>
                     <div className="flex-1 space-y-4">
                       <div className="prose prose-invert prose-sm max-w-none">
-                        <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex()]}>
-                          {item.question_text || 'Question content loading...'}
+                        <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
+                          {String(item.question_text ?? 'Question content loading...')}
                         </Markdown>
                       </div>
 

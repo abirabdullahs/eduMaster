@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { rehypeFilterUndefined } from '@/lib/rehype-filter-undefined';
 import 'katex/dist/katex.min.css';
 import type { FreeContentType } from '@/lib/types';
 
@@ -88,8 +89,8 @@ export default function FreeContentForms({ topicId, contentType, initialData, on
                 placeholder="# Heading..."
               />
               <div className="mt-2 p-4 bg-[#0d1117] rounded-xl prose prose-invert prose-sm max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex()]}>
-                  {formData.body || '_Preview_'}
+                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeFilterUndefined(), rehypeKatex()]}>
+                  {String(formData.body ?? '_Preview_')}
                 </ReactMarkdown>
               </div>
             </div>
