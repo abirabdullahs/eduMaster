@@ -262,18 +262,8 @@ export default function ExamPlayer({ exam, isPractice, practiceDuration, onCompl
               {/* Options */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {(['a', 'b', 'c', 'd'] as const).map((opt) => {
-                  // If set exists, we need to map the option
-                  let displayOption = opt;
-                  let originalOption = opt;
-                  
-                  if (examSet) {
-                    // The set stores: mapping[new_pos] = original_pos
-                    // So if we are showing button 'a', we need to show content from original_pos
-                    originalOption = examSet.shuffled_options_map[currentQuestion.id][opt];
-                  }
-
-                  const optionText = currentQuestion[`option_${originalOption}` as keyof Question] as string;
-                  const optionImage = currentQuestion[`option_${originalOption}_image` as keyof Question] as string;
+                  const optionText = currentQuestion[`option_${opt}` as keyof Question] as string;
+                  const optionImage = currentQuestion[`option_${opt}_image` as keyof Question] as string;
                   const isSelected = answers[currentQuestion.id] === opt;
 
                   return (
