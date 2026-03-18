@@ -236,7 +236,7 @@ function SortableItem({
               )}>
                 {item.title}
               </span>
-              {type === 'chapter' && item.pdf_url && (
+              {type === 'chapter' && item.suggestion_pdf_url && (
                 <span className="px-1.5 py-0.5 bg-red-500/10 text-red-500 text-[9px] font-bold rounded uppercase tracking-widest border border-red-500/20">
                   PDF
                 </span>

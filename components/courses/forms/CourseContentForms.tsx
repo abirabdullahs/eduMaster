@@ -23,7 +23,7 @@ const subjectSchema = z.object({
 const chapterSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
-  pdf_url: z.string().url('Invalid URL').optional().or(z.literal('')),
+  suggestion_pdf_url: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
 const lectureSchema = z.object({
@@ -106,7 +106,7 @@ export function SubjectForm({ isOpen, onClose, onSubmit, initialData }: Omit<For
 export function ChapterForm({ isOpen, onClose, onSubmit, initialData }: Omit<FormModalProps, 'title' | 'type'>) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(chapterSchema),
-    defaultValues: initialData || { title: '', description: '', pdf_url: '' }
+    defaultValues: initialData ? { title: initialData.title, description: initialData.description || '', suggestion_pdf_url: initialData.suggestion_pdf_url || '' } : { title: '', description: '', suggestion_pdf_url: '' }
   });
 
   if (!isOpen) return null;
@@ -141,19 +141,19 @@ export function ChapterForm({ isOpen, onClose, onSubmit, initialData }: Omit<For
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">PDF Resource URL (Optional)</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Suggestion PDF URL (Optional)</label>
             <div className="relative">
               <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input 
-                {...register('pdf_url')}
+                {...register('suggestion_pdf_url')}
                 className={cn(
                   "w-full bg-[#0d1117] border border-slate-800 rounded-2xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all",
-                  errors.pdf_url && "border-red-500/50 ring-1 ring-red-500/20"
+                  errors.suggestion_pdf_url && "border-red-500/50 ring-1 ring-red-500/20"
                 )}
                 placeholder="https://..."
               />
             </div>
-            {errors.pdf_url && <p className="text-[10px] text-red-500 font-bold">{errors.pdf_url.message as string}</p>}
+            {errors.suggestion_pdf_url && <p className="text-[10px] text-red-500 font-bold">{errors.suggestion_pdf_url.message as string}</p>}
           </div>
 
           <button 
