@@ -225,12 +225,22 @@ export default function CourseDetailPage() {
 
   const handleFormSubmit = async (type: 'subject' | 'chapter' | 'lecture', data: any) => {
     const table = type === 'subject' ? 'subjects' : type === 'chapter' ? 'chapters' : 'lectures';
+    let payload = data;
+    if (type === 'lecture') {
+      payload = {
+        title: data.title,
+        topics: data.topics,
+        video_url: data.video_url,
+        content_markdown: data.content,
+        tags: data.tags || [],
+      };
+    }
     try {
       if (editingItem) {
-        const { error } = await supabase.from(table).update(data).eq('id', editingItem.id);
+        const { error } = await supabase.from(table).update(payload).eq('id', editingItem.id);
         if (error) throw error;
       } else {
-        const insertData = { ...data };
+        const insertData = { ...payload };
         if (type === 'subject') insertData.course_id = courseId;
         if (type === 'chapter') insertData.subject_id = parentId;
         if (type === 'lecture') insertData.chapter_id = parentId;

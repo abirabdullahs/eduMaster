@@ -49,6 +49,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Home' },
+    { href: '/learn', label: 'Learn Free' },
     { href: '/courses', label: 'Courses' },
     { href: '/exams/public', label: 'Exams' },
     { href: '/about', label: 'About' },

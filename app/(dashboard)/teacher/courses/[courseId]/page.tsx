@@ -170,7 +170,8 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
         title: values.title,
         topics: values.topics,
         video_url: values.video_url,
-        content_html: values.content,
+        content_markdown: values.content,
+        tags: values.tags || [],
         chapter_id: isAddingLecture, 
         order_index: parentChapter?.lectures?.length || 0 
       });
@@ -187,7 +188,8 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
       title: values.title,
       topics: values.topics,
       video_url: values.video_url,
-      content_html: values.content
+      content_markdown: values.content,
+      tags: values.tags || []
     } : values;
 
     const { error } = await supabase
@@ -557,7 +559,8 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
               onSubmit={handleEdit} 
               initialData={{
                 ...editingItem.data,
-                content: editingItem.data.content_html
+                content: editingItem.data.content_markdown || editingItem.data.content_html,
+                tags: editingItem.data.tags
               }}
             />
           )

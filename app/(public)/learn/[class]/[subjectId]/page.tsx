@@ -1,0 +1,253 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight, Lock, CheckCircle2, Loader2, Menu, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import FreeContentViewer from '@/components/free-content/FreeContentViewer';
+
+export default function LearnSubjectPage() {
+  const params = useParams();
+  const classParam = (params.class as string)?.toUpperCase() || 'SSC';
+  const subjectId = params.subjectId as string;
+  const [subject, setSubject] = useState<any>(null);
+  const [chapters, setChapters] = useState<any[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState<any>(null);
+  const [contents, setContents] = useState<any[]>([]);
+  const [contentIndex, setContentIndex] = useState(0);
+  const [progress, setProgress] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+  }, [supabase]);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: subj } = await supabase
+        .from('free_subjects')
+        .select('*')
+        .eq('id', subjectId)
+        .single();
+      setSubject(subj);
+
+      const { data: chaps } = await supabase
+        .from('free_chapters')
+        .select(`
+          *,
+          topics:free_topics (*)
+        `)
+        .eq('subject_id', subjectId)
+        .order('order_index');
+
+      const sorted = (chaps || []).map((c: any) => ({
+        ...c,
+        topics: (c.topics || []).sort((a: any, b: any) => a.order_index - b.order_index),
+      })).sort((a: any, b: any) => a.order_index - b.order_index);
+      setChapters(sorted);
+
+      if (sorted.length > 0 && sorted[0].topics?.length > 0) {
+        const firstTopic = sorted[0].topics[0];
+        setSelectedTopic(firstTopic);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [subjectId, supabase]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (!selectedTopic) return;
+    supabase
+      .from('free_contents')
+      .select('*')
+      .eq('topic_id', selectedTopic.id)
+      .order('order_index')
+      .then(({ data }) => setContents(data || []));
+    setContentIndex(0);
+  }, [selectedTopic?.id, supabase]);
+
+  useEffect(() => {
+    if (!selectedTopic || !user) return;
+    fetch(`/api/free-content/progress?topic_id=${selectedTopic.id}`)
+      .then(r => r.json())
+      .then(d => setProgress(d.progress || {}))
+      .catch(() => {});
+  }, [selectedTopic?.id, user]);
+
+  const currentContent = contents[contentIndex];
+  const isGuest = !user;
+  const showBlur = isGuest && contentIndex >= 3 && currentContent?.is_free_preview === false;
+
+  const handleMarkComplete = async () => {
+    if (!user || !currentContent) return;
+    await fetch('/api/free-content/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content_id: currentContent.id,
+        status: 'completed',
+        answer_given: null,
+      }),
+    });
+    setProgress(p => ({ ...p, [currentContent.id]: 'completed' }));
+    if (contentIndex < contents.length - 1) setContentIndex(i => i + 1);
+  };
+
+  const handleMcqSubmit = async (answer: string) => {
+    if (!user || !currentContent) return;
+    await fetch('/api/free-content/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content_id: currentContent.id,
+        status: 'completed',
+        answer_given: answer,
+      }),
+    });
+    setProgress(p => ({ ...p, [currentContent.id]: 'completed' }));
+    if (contentIndex < contents.length - 1) setContentIndex(i => i + 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 flex items-center justify-center">
+        <Loader2 className="animate-spin text-indigo-500" size={48} />
+      </div>
+    );
+  }
+
+  const currentChapter = chapters.find(c => c.topics?.some((t: any) => t.id === selectedTopic?.id));
+
+  return (
+    <div className="min-h-screen pt-20 pb-12">
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Sidebar */}
+        <div className={cn(
+          "w-72 border-r border-slate-800 bg-[#0d1117] flex flex-col shrink-0",
+          "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-30 max-md:transform transition-transform",
+          sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
+        )}>
+          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+            <h3 className="font-bold text-white">Topics</h3>
+            <button onClick={() => setSidebarOpen(false)} className="md:hidden p-2 text-slate-500">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2">
+            {chapters.map((ch) => (
+              <div key={ch.id} className="mb-4">
+                <div className="px-3 py-2 text-xs font-bold text-slate-500 uppercase">{ch.name}</div>
+                {ch.topics?.map((t: any) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedTopic(t)}
+                    className={cn(
+                      "w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2",
+                      selectedTopic?.id === t.id ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-white/5"
+                    )}
+                  >
+                    {progress[t.id] === 'completed' ? <CheckCircle2 size={14} className="text-emerald-500" /> : null}
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden fixed bottom-4 left-4 z-20 p-3 bg-indigo-600 rounded-xl"
+          >
+            <Menu size={20} />
+          </button>
+        )}
+
+        {/* Main */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10">
+          <div className="max-w-3xl mx-auto">
+            <nav className="text-sm text-slate-500 mb-6">
+              <Link href="/learn" className="hover:text-white">Learn</Link>
+              <span className="mx-2">/</span>
+              <Link href={`/learn/${classParam}`} className="hover:text-white">{classParam}</Link>
+              <span className="mx-2">/</span>
+              <span className="text-white">{subject?.name}</span>
+              {currentChapter && (
+                <>
+                  <span className="mx-2">/</span>
+                  <span>{currentChapter.name}</span>
+                  <span className="mx-2">/</span>
+                  <span className="text-indigo-400">{selectedTopic?.name}</span>
+                </>
+              )}
+            </nav>
+
+            {!selectedTopic ? (
+              <p className="text-slate-500">Select a topic from the sidebar</p>
+            ) : contents.length === 0 ? (
+              <p className="text-slate-500">No content in this topic yet.</p>
+            ) : (
+              <div className="relative">
+                {showBlur && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-2xl">
+                    <div className="text-center p-8">
+                      <Lock size={48} className="mx-auto text-amber-500 mb-4" />
+                      <h3 className="text-xl font-bold text-white mb-2">Login to continue</h3>
+                      <p className="text-slate-400 mb-6">First 3 contents are free. Login to access more.</p>
+                      <Link
+                        href="/login"
+                        className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"
+                      >
+                        Login
+                      </Link>
+                    </div>
+                  </div>
+                )}
+                <div className={cn(showBlur && "blur-sm pointer-events-none")}>
+                  <h2 className="text-2xl font-bold text-white mb-6">{currentContent?.title}</h2>
+                  <FreeContentViewer
+                    content={currentContent}
+                    onMarkComplete={handleMarkComplete}
+                    onSubmitAnswer={handleMcqSubmit}
+                    isCompleted={progress[currentContent?.id] === 'completed'}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-800">
+                  <button
+                    onClick={() => setContentIndex(i => Math.max(0, i - 1))}
+                    disabled={contentIndex === 0}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#161b22] text-slate-400 hover:text-white disabled:opacity-50"
+                  >
+                    <ChevronLeft size={18} /> Previous
+                  </button>
+                  <span className="text-sm text-slate-500">{contentIndex + 1} / {contents.length}</span>
+                  <button
+                    onClick={() => setContentIndex(i => Math.min(contents.length - 1, i + 1))}
+                    disabled={contentIndex === contents.length - 1}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#161b22] text-slate-400 hover:text-white disabled:opacity-50"
+                  >
+                    Next <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

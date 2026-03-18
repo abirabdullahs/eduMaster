@@ -38,6 +38,7 @@ const sidebarLinks: SidebarLink[] = [
   { href: '/admin/students', label: 'Students', icon: Users, roles: ['admin'] },
   { href: '/admin/courses', label: 'Courses', icon: BookOpen, roles: ['admin'] },
   { href: '/admin/enrollments', label: 'Enrollments', icon: CreditCard, roles: ['admin'] },
+  { href: '/admin/free-content', label: 'Free Content', icon: BookOpen, roles: ['admin'] },
   { href: '/admin/exams', label: 'Exams', icon: FileText, roles: ['admin'] },
   { href: '/admin/notifications', label: 'Notifications', icon: Bell, roles: ['admin'] },
   { href: '/admin/events', label: 'Events', icon: Calendar, roles: ['admin'] },
@@ -51,6 +52,7 @@ const sidebarLinks: SidebarLink[] = [
 
   // Student Links
   { href: '/student', label: 'My Dashboard', icon: LayoutDashboard, roles: ['student'] },
+  { href: '/learn', label: 'Free Learning', icon: BookOpen, roles: ['student'] },
   { href: '/student/courses', label: 'My Courses', icon: BookOpen, roles: ['student'] },
   { href: '/student/exams', label: 'My Exams', icon: FileText, roles: ['student'] },
   { href: '/student/payments', label: 'Payments', icon: CreditCard, roles: ['student'] },

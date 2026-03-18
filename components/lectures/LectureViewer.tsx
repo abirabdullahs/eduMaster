@@ -1,7 +1,7 @@
 'use client'
 
 import { Lecture } from '@/lib/types'
-import LectureContentRenderer from './LectureContentRenderer'
+import MarkdownContentRenderer from './MarkdownContentRenderer'
 
 interface LectureViewerProps {
   lecture: Lecture
@@ -31,8 +31,8 @@ export default function LectureViewer({ lecture }: LectureViewerProps) {
       )}
 
       <div className="markdown-body">
-        {(lecture.content_html || (lecture as any).content) ? (
-          <LectureContentRenderer content={lecture.content_html || (lecture as any).content} />
+        {(lecture.content_markdown || (lecture as any).content) ? (
+          <MarkdownContentRenderer content={lecture.content_markdown || (lecture as any).content} />
         ) : (
           <p className="text-slate-400 italic">No content available for this lecture.</p>
         )}

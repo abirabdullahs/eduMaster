@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import LectureContentRenderer from '@/components/lectures/LectureContentRenderer';
+import MarkdownContentRenderer from '@/components/lectures/MarkdownContentRenderer';
 import { Course, Subject, Chapter, Lecture, LectureProgress } from '@/lib/types';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -287,10 +287,10 @@ export default function StudentCourseLearningPage({ params }: { params: Promise<
                 </div>
 
                 {/* HTML Content - rendered as live page, not raw code */}
-                {(selectedLecture.content_html || (selectedLecture as any).content) && (
+                {(selectedLecture.content_markdown || (selectedLecture as any).content) && (
                   <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-8 shadow-xl">
-                    <LectureContentRenderer 
-                      content={selectedLecture.content_html || (selectedLecture as any).content} 
+                    <MarkdownContentRenderer 
+                      content={selectedLecture.content_markdown || (selectedLecture as any).content} 
                     />
                   </div>
                 )}

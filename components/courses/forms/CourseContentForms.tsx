@@ -6,14 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { X, Loader2, Save, Plus, FileText, Video, BookOpen, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import dynamic from 'next/dynamic';
 
-// Dynamic import for ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill-new'), { 
-  ssr: false,
-  loading: () => <div className="h-40 bg-slate-800 animate-pulse rounded-2xl" />
-});
-import 'react-quill-new/dist/quill.snow.css';
+// Markdown editor - use textarea + preview (avoids SSR/type issues with @uiw/react-md-editor)
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 const subjectSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -31,6 +29,7 @@ const lectureSchema = z.object({
   topics: z.string().min(1, 'Topics are required'),
   video_url: z.string().url('Invalid URL').optional().or(z.literal('')),
   content: z.string().optional(),
+  tags: z.string().optional(),
 });
 
 interface FormModalProps {
@@ -171,15 +170,19 @@ export function ChapterForm({ isOpen, onClose, onSubmit, initialData }: Omit<For
 }
 
 export function LectureForm({ isOpen, onClose, onSubmit, initialData }: Omit<FormModalProps, 'title' | 'type'>) {
-  const [content, setContent] = useState(initialData?.content || '');
-  
+  const [content, setContent] = useState(initialData?.content ?? initialData?.content_markdown ?? '');
+  const [tagsStr, setTagsStr] = useState(
+    Array.isArray(initialData?.tags) ? initialData.tags.join(', ') : (initialData?.tags as string) || ''
+  );
+
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(lectureSchema),
     defaultValues: initialData || { title: '', topics: '', video_url: '' }
   });
 
   const handleFormSubmit = (data: any) => {
-    onSubmit({ ...data, content });
+    const tags = tagsStr.trim() ? tagsStr.split(',').map((t: string) => t.trim()).filter(Boolean) : [];
+    onSubmit({ ...data, content, tags });
   };
 
   if (!isOpen) return null;
@@ -244,6 +247,21 @@ export function LectureForm({ isOpen, onClose, onSubmit, initialData }: Omit<For
               {errors.video_url && <p className="text-[10px] text-red-500 font-bold">{errors.video_url.message as string}</p>}
             </div>
 
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Tags (comma separated)</label>
+              <input 
+                type="text"
+                value={tagsStr}
+                onChange={(e) => setTagsStr(e.target.value)}
+                className="w-full bg-[#0d1117] border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                placeholder="e.g. গতি, নিউটন, physics"
+              />
+            </div>
+            {initialData?.mcq_count !== undefined && (
+              <div className="text-xs text-slate-500">
+                MCQs: {initialData.mcq_count} (auto-calculated from attached questions)
+              </div>
+            )}
             <div className="pt-4">
               <button 
                 type="submit" 
@@ -257,23 +275,25 @@ export function LectureForm({ isOpen, onClose, onSubmit, initialData }: Omit<For
           </div>
 
           <div className="space-y-2 flex flex-col h-full">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Lecture Content (HTML)</label>
-            <div className="flex-1 min-h-[300px] bg-[#0d1117] rounded-2xl overflow-hidden border border-slate-800">
-              <ReactQuill 
-                theme="snow" 
-                value={content} 
-                onChange={setContent}
-                className="h-full text-white"
-                modules={{
-                  toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link', 'image', 'code-block'],
-                    ['clean']
-                  ],
-                }}
-              />
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Lecture Content (Markdown)</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] text-slate-500 mb-1">Edit</p>
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full h-[320px] bg-[#0d1117] border border-slate-800 rounded-2xl p-4 text-sm text-white font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  placeholder="# Heading&#10;## Subheading&#10;Use **bold**, *italic*, $math$ for LaTeX"
+                />
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 mb-1">Preview</p>
+                <div className="h-[320px] bg-[#0d1117] border border-slate-800 rounded-2xl p-4 overflow-y-auto prose prose-sm prose-invert prose-indigo max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                    {content || '_Preview will appear here_'}
+                  </ReactMarkdown>
+                </div>
+              </div>
             </div>
           </div>
         </form>

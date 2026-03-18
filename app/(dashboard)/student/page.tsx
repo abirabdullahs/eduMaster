@@ -193,6 +193,34 @@ export default async function StudentDashboard() {
               </div>
             </section>
 
+            {/* Free Learning */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <Zap className="text-amber-500" size={24} />
+                  ফ্রি লার্নিং
+                </h2>
+                <Link href="/learn" className="text-sm text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1">
+                  ব্রাউজ করুন <ChevronRight size={16} />
+                </Link>
+              </div>
+              <Link
+                href="/learn"
+                className="block bg-[#161b22] border border-slate-800 rounded-3xl p-6 hover:border-amber-500/50 transition-all group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+                    <BookOpen size={28} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white group-hover:text-amber-400">বিনামূল্যে শিখুন</h3>
+                    <p className="text-sm text-slate-400">SSC ও HSC সিলেবাস অনুযায়ী ফ্রি কন্টেন্ট</p>
+                  </div>
+                  <ChevronRight size={20} className="text-slate-500 ml-auto" />
+                </div>
+              </Link>
+            </section>
+
             {/* Upcoming Exams */}
             <section className="space-y-6">
               <div className="flex items-center justify-between">
