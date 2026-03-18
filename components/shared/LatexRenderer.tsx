@@ -17,7 +17,7 @@ export default function LatexRenderer({ content, className }: LatexRendererProps
       // Replace $...$ with inline math and $$...$$ with block math
       const processLatex = (text: string) => {
         // First handle block math $$...$$
-        let processed = text.replace(/\$\$(.*?)\$\$/gs, (match, p1) => {
+        let processed = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, p1) => {
           try {
             return katex.renderToString(p1, { displayMode: true, throwOnError: false });
           } catch (e) {
