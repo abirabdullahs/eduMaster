@@ -143,7 +143,7 @@ export default function StudentCoursesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 p-1.5 bg-[#161b22] border border-slate-800 rounded-2xl w-fit">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 p-1.5 bg-[#161b22] border border-slate-800 rounded-2xl w-full sm:w-fit">
           <button 
             onClick={() => setActiveTab('my-courses')}
             className={cn(

@@ -105,7 +105,7 @@ export default function AdminTeachers() {
           <p className="text-slate-400 mt-1">Manage teacher applications and active staff.</p>
         </div>
         
-        <div className="flex items-center bg-[#161b22] border border-slate-800 rounded-2xl p-1">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 bg-[#161b22] border border-slate-800 rounded-2xl p-1">
           <button 
             onClick={() => router.push('/admin/teachers?tab=active')}
             className={cn(

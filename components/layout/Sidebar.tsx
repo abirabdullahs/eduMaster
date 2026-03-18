@@ -14,12 +14,14 @@ import {
   CreditCard,
   LogOut,
   ChevronRight,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserRole } from '@/lib/types';
 import { useAdminView } from '@/lib/context/AdminViewContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useSidebar } from '@/lib/context/SidebarContext';
 
 interface SidebarLink {
   href: string;
@@ -58,6 +60,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
   const pathname = usePathname();
   const { viewAs, isAdmin } = useAdminView();
   const { signOut } = useAuth();
+  const { sidebarOpen, closeSidebar } = useSidebar();
 
   // If admin is viewing as another role, use that role for sidebar links
   const effectiveRole = (isAdmin && viewAs) ? viewAs : role;
@@ -65,9 +68,28 @@ export default function Sidebar({ role }: { role: UserRole }) {
   const filteredLinks = sidebarLinks.filter(link => link.roles.includes(effectiveRole));
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-[#0d1117] border-r border-slate-800 flex flex-col z-40">
+    <>
+      {/* Mobile overlay */}
+      <div
+        onClick={closeSidebar}
+        className={cn(
+          "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity",
+          sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+      />
+      <aside className={cn(
+        "fixed left-0 top-0 bottom-0 w-64 bg-[#0d1117] border-r border-slate-800 flex flex-col z-50 transition-transform duration-300 ease-out",
+        "md:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
+        {/* Mobile close button */}
+        <div className="md:hidden absolute top-4 right-4">
+          <button onClick={closeSidebar} className="p-2 text-slate-400 hover:text-white rounded-lg">
+            <X size={20} />
+          </button>
+        </div>
       {/* Logo */}
-      <div className="p-6 border-b border-slate-800">
+      <div className="p-6 pr-14 md:pr-6 border-b border-slate-800">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">E</span>
@@ -92,6 +114,7 @@ export default function Sidebar({ role }: { role: UserRole }) {
             <Link
               key={link.href}
               href={link.href}
+              onClick={closeSidebar}
               className={cn(
                 "flex items-center justify-between px-3 py-2 rounded-xl transition-all group",
                 isActive 
@@ -127,5 +150,6 @@ export default function Sidebar({ role }: { role: UserRole }) {
         </button>
       </div>
     </aside>
+    </>
   );
 }

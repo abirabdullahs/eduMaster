@@ -98,7 +98,7 @@ export default function AdminEnrollments() {
           <p className="text-slate-400 mt-1">Review and approve student enrollment requests.</p>
         </div>
         
-        <div className="flex items-center bg-[#161b22] border border-slate-800 rounded-2xl p-1">
+        <div className="flex flex-wrap sm:flex-nowrap items-center bg-[#161b22] border border-slate-800 rounded-2xl p-1 gap-1">
           {[
             { id: 'pending', label: 'Pending' },
             { id: 'active', label: 'Active' },
@@ -133,7 +133,7 @@ export default function AdminEnrollments() {
       {/* Content */}
       <div className="bg-[#161b22] border border-slate-800 rounded-3xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="bg-[#0d1117] border-b border-slate-800">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Student</th>

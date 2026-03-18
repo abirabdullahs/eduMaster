@@ -193,7 +193,7 @@ export default function AdminStudents() {
       {/* Table */}
       <div className="bg-[#161b22] border border-slate-800 rounded-3xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[560px]">
             <thead>
               <tr className="bg-[#0d1117] border-b border-slate-800">
                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Student</th>
@@ -280,8 +280,8 @@ export default function AdminStudents() {
 
       {/* Student Detail Modal */}
       {selectedStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl h-full bg-[#0d1117] border-l border-slate-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+          <div className="w-full sm:max-w-2xl h-full bg-[#0d1117] sm:border-l border-slate-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-[#161b22]">
               <div className="flex items-center gap-4">

@@ -48,7 +48,7 @@ export function ViewAsBanner() {
   if (!isAdmin || !viewAs) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-600 text-white py-1.5 px-4 flex items-center justify-center gap-4 shadow-xl">
+    <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-600 text-white py-1.5 px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 shadow-xl">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
         <Eye size={14} />
         You are currently viewing as a <span className="underline decoration-2 underline-offset-4">{viewAs}</span>

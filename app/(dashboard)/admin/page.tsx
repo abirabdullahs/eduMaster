@@ -166,7 +166,7 @@ export default function AdminOverview() {
         <div className="space-y-8">
           <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-6 space-y-6">
             <h3 className="text-lg font-bold text-white">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
               {[
                 { label: 'Add Student', icon: Users, color: 'bg-blue-500/10 text-blue-500', href: '/admin/students' },
                 { label: 'New Exam', icon: FileText, color: 'bg-purple-500/10 text-purple-500', href: '/admin/exams' },
