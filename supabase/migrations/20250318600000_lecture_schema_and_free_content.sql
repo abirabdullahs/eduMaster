@@ -1,5 +1,8 @@
 -- PART A1: Lecture schema changes
 -- Remove content_html, add content_markdown, tags, mcq_count
+-- Add lecture_id to questions for lecture MCQs (if missing)
+
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS lecture_id UUID REFERENCES lectures(id) ON DELETE CASCADE;
 
 -- Add new columns first
 ALTER TABLE lectures ADD COLUMN IF NOT EXISTS content_markdown TEXT;

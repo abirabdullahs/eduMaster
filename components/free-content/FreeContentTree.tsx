@@ -14,6 +14,10 @@ interface FreeContentTreeProps {
   onAddContent: (topicId: string) => void;
   onSelectContentType: (topicId: string, type: FreeContentType) => void;
   onEditContent: (content: any) => void;
+  onEditChapter: (chapter: any) => void;
+  onDeleteChapter: (chapter: any) => void;
+  onEditTopic: (topic: any, chapterId: string) => void;
+  onDeleteTopic: (topic: any) => void;
   isContentTypeOpen: boolean;
   onCloseContentType: () => void;
 }
@@ -25,6 +29,10 @@ export default function FreeContentTree({
   onAddContent,
   onSelectContentType,
   onEditContent,
+  onEditChapter,
+  onDeleteChapter,
+  onEditTopic,
+  onDeleteTopic,
   isContentTypeOpen,
   onCloseContentType,
 }: FreeContentTreeProps) {
@@ -70,26 +78,58 @@ export default function FreeContentTree({
                 <ChevronRight size={18} className="text-slate-500" />
               )}
               <span className="font-bold text-white flex-1">{chapter.name}</span>
-              <button
-                onClick={(e) => { e.stopPropagation(); onAddTopic(chapter.id); }}
-                className="p-2 text-slate-500 hover:text-indigo-400 rounded-lg"
-                title="Add Topic"
-              >
-                <Plus size={16} />
-              </button>
+              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => onEditChapter(chapter)}
+                  className="p-2 text-slate-500 hover:text-indigo-400 rounded-lg"
+                  title="Edit Chapter"
+                >
+                  <Edit3 size={14} />
+                </button>
+                <button
+                  onClick={() => onDeleteChapter(chapter)}
+                  className="p-2 text-slate-500 hover:text-red-400 rounded-lg"
+                  title="Delete Chapter"
+                >
+                  <Trash2 size={14} />
+                </button>
+                <button
+                  onClick={() => onAddTopic(chapter.id)}
+                  className="p-2 text-slate-500 hover:text-indigo-400 rounded-lg"
+                  title="Add Topic"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
             </div>
             {expandedChapters.has(chapter.id) && (
               <div className="pl-8 pr-4 pb-4 space-y-2">
                 {(chapter.topics || []).map((topic: any) => (
                   <div key={topic.id} className="bg-[#0d1117] rounded-xl border border-slate-800 overflow-hidden">
                     <div className="flex items-center justify-between p-3">
-                      <span className="font-medium text-slate-300">{topic.name}</span>
-                      <button
-                        onClick={() => handleAddContentClick(topic.id)}
-                        className="flex items-center gap-1 px-2 py-1 text-xs bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/40 rounded-lg"
-                      >
-                        <Plus size={12} /> Add Content
-                      </button>
+                      <span className="font-medium text-slate-300 flex-1">{topic.name}</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => onEditTopic(topic, chapter.id)}
+                          className="p-1.5 text-slate-500 hover:text-indigo-400 rounded-lg"
+                          title="Edit Topic"
+                        >
+                          <Edit3 size={14} />
+                        </button>
+                        <button
+                          onClick={() => onDeleteTopic(topic)}
+                          className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg"
+                          title="Delete Topic"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleAddContentClick(topic.id)}
+                          className="flex items-center gap-1 px-2 py-1 text-xs bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/40 rounded-lg"
+                        >
+                          <Plus size={12} /> Add Content
+                        </button>
+                      </div>
                     </div>
                     <div className="px-3 pb-3 space-y-1">
                       {(topic.contents || []).map((content: any) => (

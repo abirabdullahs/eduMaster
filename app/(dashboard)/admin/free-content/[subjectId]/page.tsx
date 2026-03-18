@@ -16,6 +16,67 @@ import ContentTypeSelector from '@/components/free-content/ContentTypeSelector';
 import FreeContentForms from '@/components/free-content/FreeContentForms';
 import type { FreeContentType } from '@/lib/types';
 
+function EditChapterTopicModal({
+  title,
+  initialName,
+  onClose,
+  onSave,
+}: {
+  title: string;
+  initialName: string;
+  onClose: () => void;
+  onSave: (name: string) => Promise<void>;
+}) {
+  const [name, setName] = useState(initialName);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setErr('নাম দিন');
+      return;
+    }
+    setSaving(true);
+    setErr('');
+    try {
+      await onSave(trimmed);
+    } catch (e: any) {
+      setErr(e.message || 'Failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#161b22] border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-xl">
+        <h3 className="text-lg font-bold text-white mb-4">{title}</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-4 py-3 bg-[#0d1117] border border-slate-700 rounded-xl text-white placeholder-slate-500"
+            placeholder="নাম দিন"
+            autoFocus
+          />
+          {err && <p className="text-sm text-red-400">{err}</p>}
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-slate-400 hover:text-white rounded-xl">
+              বাতিল
+            </button>
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl disabled:opacity-50">
+              {saving ? 'সংরক্ষণ...' : 'সংরক্ষণ'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminFreeSubjectPage() {
   const params = useParams();
   const router = useRouter();
@@ -25,8 +86,8 @@ export default function AdminFreeSubjectPage() {
   const [loading, setLoading] = useState(true);
   const [contentTypeModal, setContentTypeModal] = useState<{ topicId: string } | null>(null);
   const [contentForm, setContentForm] = useState<{ topicId: string; type: FreeContentType; content?: any } | null>(null);
-  const [addingChapter, setAddingChapter] = useState(false);
-  const [addingTopic, setAddingTopic] = useState<string | null>(null);
+  const [editingChapter, setEditingChapter] = useState<any | null>(null);
+  const [editingTopic, setEditingTopic] = useState<{ topic: any; chapterId: string } | null>(null);
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
@@ -98,6 +159,22 @@ export default function AdminFreeSubjectPage() {
     setContentForm({ topicId: content.topic_id, type: content.content_type as FreeContentType, content });
   };
 
+  const handleEditChapter = (chapter: any) => setEditingChapter(chapter);
+  const handleDeleteChapter = async (chapter: any) => {
+    if (!confirm(`Delete chapter "${chapter.name}" and all its topics/contents?`)) return;
+    const { error } = await supabase.from('free_chapters').delete().eq('id', chapter.id);
+    if (!error) fetchData();
+    else alert('Failed: ' + error.message);
+  };
+
+  const handleEditTopic = (topic: any, chapterId: string) => setEditingTopic({ topic, chapterId });
+  const handleDeleteTopic = async (topic: any) => {
+    if (!confirm(`Delete topic "${topic.name}" and all its contents?`)) return;
+    const { error } = await supabase.from('free_topics').delete().eq('id', topic.id);
+    if (!error) fetchData();
+    else alert('Failed: ' + error.message);
+  };
+
   if (loading || !subject) {
     return (
       <DashboardShell>
@@ -130,6 +207,10 @@ export default function AdminFreeSubjectPage() {
           onAddContent={(topicId) => setContentTypeModal({ topicId })}
           onSelectContentType={handleSelectContentType}
           onEditContent={handleEditContent}
+          onEditChapter={handleEditChapter}
+          onDeleteChapter={handleDeleteChapter}
+          onEditTopic={handleEditTopic}
+          onDeleteTopic={handleDeleteTopic}
           isContentTypeOpen={!!contentTypeModal}
           onCloseContentType={() => setContentTypeModal(null)}
         />
@@ -152,6 +233,38 @@ export default function AdminFreeSubjectPage() {
           onSuccess={() => {
             setContentForm(null);
             fetchData();
+          }}
+        />
+      )}
+
+      {/* Edit Chapter Modal */}
+      {editingChapter && (
+        <EditChapterTopicModal
+          title="Edit Chapter"
+          initialName={editingChapter.name}
+          onClose={() => setEditingChapter(null)}
+          onSave={async (name: string) => {
+            const { error } = await supabase.from('free_chapters').update({ name }).eq('id', editingChapter.id);
+            if (!error) {
+              setEditingChapter(null);
+              fetchData();
+            } else throw new Error(error.message);
+          }}
+        />
+      )}
+
+      {/* Edit Topic Modal */}
+      {editingTopic && (
+        <EditChapterTopicModal
+          title="Edit Topic"
+          initialName={editingTopic.topic.name}
+          onClose={() => setEditingTopic(null)}
+          onSave={async (name: string) => {
+            const { error } = await supabase.from('free_topics').update({ name }).eq('id', editingTopic.topic.id);
+            if (!error) {
+              setEditingTopic(null);
+              fetchData();
+            } else throw new Error(error.message);
           }}
         />
       )}

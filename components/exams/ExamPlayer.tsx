@@ -243,7 +243,7 @@ export default function ExamPlayer({ exam, isPractice, practiceDuration, onCompl
                 </div>
                 <div className="flex-1 space-y-6">
                   <div className="prose prose-invert prose-lg max-w-none font-medium text-white">
-                    <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                    <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex({ strict: 'ignore', throwOnError: false })]}>
                       {currentQuestion.question_text}
                     </Markdown>
                   </div>
