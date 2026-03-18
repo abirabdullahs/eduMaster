@@ -25,7 +25,9 @@ export default function Error({
         <div className="space-y-3">
           <h1 className="text-3xl font-black text-white">Something went wrong</h1>
           <p className="text-slate-400 text-sm leading-relaxed">
-            We encountered an unexpected error. Our team has been notified and we are working to fix it.
+            {error?.message?.includes('Cannot create property')
+              ? 'Your session may be corrupted. Try logging out and signing in again.'
+              : 'We encountered an unexpected error. Our team has been notified and we are working to fix it.'}
           </p>
         </div>
 
