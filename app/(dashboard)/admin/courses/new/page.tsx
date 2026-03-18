@@ -24,9 +24,9 @@ const courseSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),
   thumbnail_url: z.string().url('Invalid thumbnail URL'),
-  intro_video_url: z.string().url('Invalid intro video URL').optional().or(z.literal('')),
+  intro_video_url: z.string(),
   main_price: z.number().min(0, 'Price must be positive'),
-  discounted_price: z.number().min(0, 'Discounted price must be positive').optional(),
+  discounted_price: z.number().min(0, 'Discounted price must be positive'),
   is_offline: z.boolean(),
   teacher_id: z.string().min(1, 'Please assign a teacher'),
   status: z.enum(['draft', 'published']),
@@ -50,8 +50,15 @@ export default function NewCoursePage() {
   } = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
-      status: 'draft',
+      title: '',
+      description: '',
+      thumbnail_url: '',
+      intro_video_url: '',
+      main_price: 0,
+      discounted_price: 0,
       is_offline: false,
+      teacher_id: '',
+      status: 'draft',
     }
   });
 

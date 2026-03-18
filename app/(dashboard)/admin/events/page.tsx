@@ -30,7 +30,7 @@ const eventSchema = z.object({
   event_time: z.string().min(1, 'Please select a time'),
   location: z.string().min(1, 'Please specify a location (Online/Physical)'),
   registration_link: z.string().url('Invalid registration URL').optional().or(z.literal('')),
-  max_participants: z.number().min(0, 'Must be positive').optional(),
+  max_participants: z.number().min(0, 'Must be positive'),
   thumbnail_url: z.string().url('Invalid thumbnail URL').optional().or(z.literal('')),
 });
 
@@ -53,6 +53,16 @@ export default function AdminEvents() {
     formState: { errors },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      event_date: '',
+      event_time: '',
+      location: '',
+      registration_link: '',
+      max_participants: 0,
+      thumbnail_url: '',
+    }
   });
 
   const fetchEvents = useCallback(async () => {

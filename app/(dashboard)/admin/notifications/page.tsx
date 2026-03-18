@@ -26,8 +26,8 @@ const notificationSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   message: z.string().min(10, 'Message must be at least 10 characters'),
   target: z.enum(['all', 'students', 'teachers', 'course', 'specific']),
-  target_user_id: z.string().optional(),
-  target_course_id: z.string().optional(),
+  target_user_id: z.string(),
+  target_course_id: z.string(),
 });
 
 type NotificationFormValues = z.infer<typeof notificationSchema>;
@@ -51,7 +51,11 @@ export default function AdminNotifications() {
   } = useForm<NotificationFormValues>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
+      title: '',
+      message: '',
       target: 'all',
+      target_user_id: '',
+      target_course_id: '',
     }
   });
 
