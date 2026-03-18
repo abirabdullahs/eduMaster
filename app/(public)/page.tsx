@@ -3,6 +3,7 @@ import StatsSection from '@/components/home/StatsSection';
 import FeaturedCourses from '@/components/home/FeaturedCourses';
 import UpcomingExams from '@/components/home/UpcomingExams';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
+import FounderSection from '@/components/home/FounderSection';
 import FAQSection from '@/components/home/FAQSection';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ export default function HomePage() {
       <FeaturedCourses />
       <UpcomingExams />
       <TestimonialsSection />
+      <FounderSection />
       <FAQSection />
       
       {/* Call to Action Section */}

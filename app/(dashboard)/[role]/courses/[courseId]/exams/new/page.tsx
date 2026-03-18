@@ -31,7 +31,6 @@ const examSchema = z.object({
   negative_value: z.number().min(0),
   start_time: z.string().min(1, 'Start time is required'),
   end_time: z.string().min(1, 'End time is required'),
-  number_of_sets: z.number().min(1).max(10),
   status: z.enum(['draft', 'published']),
 });
 
@@ -63,7 +62,6 @@ export default function NewExamPage() {
       negative_value: 0.25,
       start_time: '',
       end_time: '',
-      number_of_sets: 1,
       status: 'draft',
     }
   });
@@ -245,17 +243,10 @@ export default function NewExamPage() {
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Number of Sets</label>
-              <input 
-                {...register('number_of_sets', { valueAsNumber: true })}
-                type="number" 
-                min="1"
-                max="10"
-                className="w-full max-w-[200px] bg-[#0d1117] border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-              />
-              <p className="mt-2 text-xs text-slate-500">
-                Each set will have the same questions but in a shuffled order with shuffled options.
+            <div className="p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl">
+              <p className="text-sm font-bold text-indigo-300">Auto Shuffle</p>
+              <p className="mt-1 text-xs text-slate-400">
+                Questions and options will be shuffled automatically for each student when they start the exam.
               </p>
             </div>
           </div>

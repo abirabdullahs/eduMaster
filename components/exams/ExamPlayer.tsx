@@ -15,7 +15,7 @@ import {
   Menu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Exam, Question, ExamSet, OptionChoice } from '@/lib/types';
+import { Exam, Question, OptionChoice } from '@/lib/types';
 import Markdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -32,7 +32,6 @@ interface ExamPlayerProps {
 
 export default function ExamPlayer({ exam, isPractice, practiceDuration, onComplete }: ExamPlayerProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [examSet, setExamSet] = useState<ExamSet | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, OptionChoice>>({});
   const [loading, setLoading] = useState(true);
@@ -43,39 +42,51 @@ export default function ExamPlayer({ exam, isPractice, practiceDuration, onCompl
   
   const supabase = createClient();
 
+  const shuffleArray = <T,>(arr: T[]): T[] => {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  };
+
+  const shuffleOptions = (q: Question): Question => {
+    const keys: (keyof Question)[] = ['option_a', 'option_b', 'option_c', 'option_d'];
+    const labels: OptionChoice[] = ['a', 'b', 'c', 'd'];
+    const entries = keys
+      .map((k, i) => ({ key: k, val: (q as any)[k], label: labels[i] }))
+      .filter(e => e.val != null && e.val !== '');
+    const shuffled = shuffleArray(entries);
+    const newQ = { ...q };
+    const oldCorrectVal = (q as any)['option_' + q.correct_option];
+    shuffled.forEach((e, i) => {
+      (newQ as any)[keys[i]] = e.val;
+      if (e.val === oldCorrectVal) {
+        (newQ as any).correct_option = labels[i];
+      }
+    });
+    return newQ;
+  };
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Get Exam Sets
-      const { data: sets } = await supabase
-        .from('exam_sets')
-        .select('*')
-        .eq('exam_id', exam.id);
-
-      let selectedSet: ExamSet | null = null;
-      if (sets && sets.length > 0) {
-        // Pick a random set
-        selectedSet = sets[Math.floor(Math.random() * sets.length)];
-        setExamSet(selectedSet);
-      }
-
-      // 2. Get Questions
       const { data: questionData } = await supabase
         .from('exam_questions')
         .select('*')
-        .eq('exam_id', exam.id);
+        .eq('exam_id', exam.id)
+        .order('order_index', { ascending: true });
 
-      if (!questionData) throw new Error('No questions found');
+      if (!questionData || questionData.length === 0) throw new Error('No questions found');
 
-      // 3. Apply Shuffling if set exists
-      let finalQuestions = questionData;
-      if (selectedSet) {
-        finalQuestions = selectedSet.shuffled_question_order
-          .map(id => questionData.find(q => q.id === id))
-          .filter(Boolean) as Question[];
-      }
+      const shuffledOrder = shuffleArray(questionData.map(q => q.id));
+      const ordered = shuffledOrder
+        .map(id => questionData.find(q => q.id === id))
+        .filter(Boolean) as Question[];
+      const withShuffledOptions = ordered.map(q => shuffleOptions(q));
 
-      setQuestions(finalQuestions);
+      setQuestions(withShuffledOptions);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -104,7 +115,7 @@ export default function ExamPlayer({ exam, isPractice, practiceDuration, onCompl
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           exam_id: exam.id,
-          set_id: examSet?.id,
+          set_id: null,
           answers: Object.entries(answers).map(([question_id, selected_option]) => ({
             question_id,
             selected_option

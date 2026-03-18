@@ -145,10 +145,12 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
     const { error } = await supabase
       .from('chapters')
       .insert({ ...values, subject_id: isAddingChapter, order_index: parentSubject?.chapters?.length || 0 });
-    if (!error) {
-      setIsAddingChapter(null);
-      fetchData();
+    if (error) {
+      alert('Failed to add chapter: ' + error.message);
+      return;
     }
+    setIsAddingChapter(null);
+    fetchData();
   };
 
   const handleAddLecture = async (values: any) => {

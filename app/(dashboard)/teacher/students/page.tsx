@@ -63,17 +63,19 @@ export default function TeacherStudentsPage() {
       // Group by student to avoid duplicates if enrolled in multiple courses
       const studentMap = new Map();
       enrollmentData?.forEach((e: any) => {
+        const courseTitle = e.courses?.title;
         if (!studentMap.has(e.student_id)) {
           studentMap.set(e.student_id, {
             ...e.profiles,
-            courses: [e.courses.title],
+            id: e.student_id,
+            courses: courseTitle ? [courseTitle] : [],
             courseIds: [e.course_id],
             enrolled_at: e.created_at
           });
         } else {
           const s = studentMap.get(e.student_id);
-          s.courses.push(e.courses.title);
-          s.courseIds.push(e.course_id);
+          if (courseTitle && !s.courses.includes(courseTitle)) s.courses.push(courseTitle);
+          if (!s.courseIds.includes(e.course_id)) s.courseIds.push(e.course_id);
         }
       });
 
@@ -95,13 +97,27 @@ export default function TeacherStudentsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get teacher's course IDs again to filter attempts
       const { data: teacherCourses } = await supabase
         .from('courses')
         .select('id')
         .eq('teacher_id', user.id);
       
       const teacherCourseIds = teacherCourses?.map(c => c.id) || [];
+      if (teacherCourseIds.length === 0) {
+        setStudentAttempts([]);
+        return;
+      }
+
+      const { data: teacherExams } = await supabase
+        .from('exams')
+        .select('id')
+        .in('course_id', teacherCourseIds);
+      const examIds = teacherExams?.map(e => e.id) || [];
+
+      if (examIds.length === 0) {
+        setStudentAttempts([]);
+        return;
+      }
 
       const { data: attempts } = await supabase
         .from('exam_attempts')
@@ -110,10 +126,10 @@ export default function TeacherStudentsPage() {
           exams:exam_id (*)
         `)
         .eq('student_id', studentId)
-        .in('exams.course_id', teacherCourseIds)
+        .in('exam_id', examIds)
         .order('submitted_at', { ascending: false });
 
-      setStudentAttempts(attempts?.filter(a => a.exams) || []);
+      setStudentAttempts(attempts?.filter((a: any) => a.exams) || []);
     } catch (err) {
       console.error(err);
     } finally {
