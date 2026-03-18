@@ -147,7 +147,6 @@ export default function AdminFreeSubjectPage() {
       .from('free_topics')
       .insert({ chapter_id: chapterId, name: 'New Topic', order_index: len });
     if (!error) fetchData();
-    setAddingTopic(null);
   };
 
   const handleSelectContentType = (topicId: string, type: FreeContentType) => {
