@@ -21,7 +21,7 @@ const schema = z.object({
   name: z.string().min(1, 'Name required'),
   description: z.string().optional(),
   thumbnail_url: z.string().url().optional().or(z.literal('')),
-  language: z.enum(['bangla', 'hindi', 'siliguri']).default('bangla'),
+  language: z.enum(['bangla', 'hindi', 'siliguri']).optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -56,7 +56,7 @@ export default function NewFreeSubjectPage() {
         name: data.name,
         description: data.description || null,
         thumbnail_url: data.thumbnail_url || null,
-        language: data.language || 'bangla',
+        language: data.language ?? 'bangla',
         order_index: 999,
       })
       .select('id')
