@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import MonthlyDueAlert from '@/components/student/MonthlyDueAlert'
+import RecentNotificationCards from '@/components/student/RecentNotificationCards'
 
 export default async function StudentDashboard() {
   const supabase = createClient()
@@ -311,30 +312,7 @@ export default async function StudentDashboard() {
                 <Bell className="text-purple-500" size={24} />
                 নোটিফিকেশন
               </h3>
-              <div className="space-y-4">
-                {notifications?.map((notif) => (
-                  <div key={notif.id} className={cn(
-                    "bg-[#161b22] border rounded-2xl p-5 space-y-2 transition-all",
-                    notif.is_read ? "border-slate-800 opacity-60" : "border-purple-500/30 bg-purple-500/5 shadow-lg shadow-purple-500/5"
-                  )}>
-                    <h4 className="font-bold text-white text-sm">{notif.title}</h4>
-                    <p className="text-xs text-slate-400 line-clamp-2">{notif.body}</p>
-                    <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
-                      {format(new Date(notif.created_at), 'MMM d, p')}
-                    </p>
-                  </div>
-                ))}
-                {(!notifications || notifications.length === 0) && (
-                  <div className="p-8 text-center text-slate-600 bg-[#161b22] border border-slate-800 rounded-2xl text-xs">
-                    কোনো নোটিফিকেশন নেই।
-                  </div>
-                )}
-                {notifications && notifications.length > 0 && (
-                  <Link href="/student/notifications" className="block text-center text-xs font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-widest">
-                    সবগুলো দেখুন
-                  </Link>
-                )}
-              </div>
+              <RecentNotificationCards notifications={notifications || []} />
             </section>
           </div>
         </div>

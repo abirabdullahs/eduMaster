@@ -18,6 +18,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -28,6 +29,7 @@ const notificationSchema = z.object({
   target: z.enum(['all', 'students', 'teachers', 'course', 'specific']),
   target_user_id: z.string(),
   target_course_id: z.string(),
+  action_link: z.string().optional(),
 });
 
 type NotificationFormValues = z.infer<typeof notificationSchema>;
@@ -56,6 +58,7 @@ export default function AdminNotifications() {
       target: 'all',
       target_user_id: '',
       target_course_id: '',
+      action_link: '',
     }
   });
 
@@ -77,6 +80,16 @@ export default function AdminNotifications() {
       setHistoryLoading(false);
     }
   }, [supabase]);
+
+  // Group same broadcast (same title, body, created_at) into one card
+  const grouped = (notifications as any[]).reduce<{ key: string; items: any[] }[]>((acc, n) => {
+    const body = n.body ?? n.message ?? '';
+    const key = `${n.title}|${body}|${n.created_at}`;
+    const found = acc.find(g => g.key === key);
+    if (found) found.items.push(n);
+    else acc.push({ key, items: [n] });
+    return acc;
+  }, []);
 
   useEffect(() => {
     fetchHistory();
@@ -104,6 +117,7 @@ export default function AdminNotifications() {
           target: values.target,
           target_user_id: values.target === 'specific' ? values.target_user_id : undefined,
           target_course_id: values.target === 'course' ? values.target_course_id : undefined,
+          action_link: values.action_link || undefined,
         }),
       });
 
@@ -120,10 +134,11 @@ export default function AdminNotifications() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this notification record?')) return;
+  const handleDelete = async (group: { items: any[] }) => {
+    if (!confirm(`Delete this broadcast (sent to ${group.items.length} user(s))?`)) return;
     try {
-      const { error } = await supabase.from('notifications').delete().eq('id', id);
+      const ids = group.items.map(i => i.id);
+      const { error } = await supabase.from('notifications').delete().in('id', ids);
       if (error) throw error;
       fetchHistory();
     } catch (err: any) {
@@ -162,11 +177,11 @@ export default function AdminNotifications() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Message Content</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Message Content <span className="text-slate-600 normal-case">(Markdown supported)</span></label>
               <textarea 
                 {...register('message')}
                 rows={4}
-                placeholder="Write your message here..."
+                placeholder="Write your message here... (Markdown: **bold**, *italic*, [link](url))"
                 className={cn(
                   "w-full bg-[#0d1117] border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all",
                   errors.message && "border-red-500 focus:ring-red-500"
@@ -236,6 +251,16 @@ export default function AdminNotifications() {
                 {errors.target_course_id && <p className="mt-1 text-xs text-red-500">{errors.target_course_id.message as string}</p>}
               </div>
             )}
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Target Link <span className="text-slate-600 normal-case">(optional – if set, click will navigate instead of showing modal)</span></label>
+              <input 
+                {...register('action_link')}
+                type="text" 
+                placeholder="e.g. /student/courses or https://..."
+                className="w-full bg-[#0d1117] border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              />
+            </div>
           </div>
 
           {error && (
@@ -272,45 +297,41 @@ export default function AdminNotifications() {
               <Loader2 className="animate-spin text-indigo-500" size={32} />
               <p className="text-slate-500 text-sm">Loading history...</p>
             </div>
-          ) : notifications.length === 0 ? (
+          ) : grouped.length === 0 ? (
             <div className="p-12 text-center bg-[#161b22] border border-dashed border-slate-800 rounded-3xl text-slate-500">
               No notifications sent yet.
             </div>
           ) : (
-            notifications.map((notif) => (
-              <div key={notif.id} className="bg-[#161b22] border border-slate-800 rounded-2xl p-6 space-y-3 group relative">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-white">{notif.title}</h4>
-                    <p className="text-xs text-slate-400 leading-relaxed">{notif.message}</p>
+            grouped.map((grp) => {
+              const notif = grp.items[0];
+              const body = notif.body ?? notif.message ?? '';
+              return (
+                <div key={grp.key} className="bg-[#161b22] border border-slate-800 rounded-2xl p-6 space-y-3 group relative">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <h4 className="text-sm font-bold text-white">{notif.title}</h4>
+                      <div className="text-xs text-slate-400 leading-relaxed prose prose-invert prose-sm max-w-none prose-p:text-slate-400 prose-p:text-xs prose-headings:text-white prose-strong:text-white">
+                        <SafeMarkdown>{body}</SafeMarkdown>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => handleDelete(grp)}
+                      className="p-2 text-slate-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => handleDelete(notif.id)}
-                    className="p-2 text-slate-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                  <div className="flex items-center gap-2">
-                    <span className={cn(
-                      "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest",
-                      notif.target === 'all' ? "bg-indigo-500/10 text-indigo-500" :
-                      notif.target === 'students' ? "bg-emerald-500/10 text-emerald-500" :
-                      notif.target === 'teachers' ? "bg-amber-500/10 text-amber-500" :
-                      notif.target === 'course' ? "bg-blue-500/10 text-blue-500" :
-                      notif.target === 'specific' ? "bg-purple-500/10 text-purple-500" :
-                      "bg-slate-500/10 text-slate-500"
-                    )}>
-                      {notif.target || 'user'}
+                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                    <span className="text-[10px] text-slate-500">
+                      Sent to <span className="font-bold text-indigo-400">{grp.items.length}</span> recipient{grp.items.length !== 1 ? 's' : ''}
+                    </span>
+                    <span className="text-[10px] text-slate-500">
+                      {new Date(notif.created_at).toLocaleString()}
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-500">
-                    {new Date(notif.created_at).toLocaleString()}
-                  </span>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { title, message, target, target_user_id, target_course_id } = body
+    const { title, message, target, target_user_id, target_course_id, action_link } = body
 
     if (!title || !message || !target) {
       return NextResponse.json({ error: 'Missing title, message, or target' }, { status: 400 })
@@ -78,6 +78,7 @@ export async function POST(req: Request) {
       body: message,
       is_read: false,
       type: 'general',
+      action_link: action_link || null,
       created_at: now
     }))
 

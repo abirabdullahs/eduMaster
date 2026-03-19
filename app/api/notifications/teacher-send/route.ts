@@ -52,12 +52,14 @@ export async function POST(req: Request) {
     }
 
     const now = new Date().toISOString()
+    const action_link = body.action_link || null;
     const rows = studentIds.map(student_id => ({
       user_id: student_id,
       title,
       body: message,
       is_read: false,
       type: 'general',
+      action_link,
       created_at: now
     }))
 

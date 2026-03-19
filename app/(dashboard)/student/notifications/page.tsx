@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { 
@@ -8,21 +9,24 @@ import {
   Loader2, 
   CheckCircle2, 
   Trash2, 
-  Calendar,
   Clock,
   Info,
   AlertTriangle,
-  MailOpen
+  MailOpen,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/useAuth';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
 
 export default function StudentNotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [modalNotif, setModalNotif] = useState<any | null>(null);
   const { user } = useAuth();
   const supabase = createClient();
+  const router = useRouter();
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -31,7 +35,7 @@ export default function StudentNotificationsPage() {
       const { data } = await supabase
         .from('notifications')
         .select('*')
-        .eq('student_id', user.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       setNotifications(data || []);
@@ -66,7 +70,7 @@ export default function StudentNotificationsPage() {
       const { error } = await supabase
         .from('notifications')
         .update({ is_read: true })
-        .eq('student_id', user.id)
+        .eq('user_id', user.id)
         .eq('is_read', false);
 
       if (error) throw error;
@@ -116,63 +120,84 @@ export default function StudentNotificationsPage() {
         ) : (
           <div className="space-y-4">
             {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <div 
-                  key={notification.id} 
-                  className={cn(
-                    "group bg-[#161b22] border rounded-3xl p-6 transition-all flex gap-6 relative overflow-hidden",
-                    notification.is_read ? "border-slate-800 opacity-60" : "border-indigo-500/30 shadow-lg shadow-indigo-500/5"
-                  )}
-                >
-                  {!notification.is_read && (
-                    <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
-                  )}
+              notifications.map((notification) => {
+                const body = notification.body ?? notification.message ?? '';
+                const hasLink = !!(notification.action_link);
+                const handleRowClick = () => {
+                  markAsRead(notification.id);
+                  if (hasLink) {
+                    const link = notification.action_link;
+                    if (link?.startsWith('http')) window.location.href = link;
+                    else router.push(link);
+                  } else {
+                    setModalNotif(notification);
+                  }
+                };
+                return (
+                  <div 
+                    key={notification.id} 
+                    onClick={handleRowClick}
+                    className={cn(
+                      "group bg-[#161b22] border rounded-3xl p-6 transition-all flex gap-6 relative overflow-hidden cursor-pointer",
+                      notification.is_read ? "border-slate-800 opacity-60" : "border-indigo-500/30 shadow-lg shadow-indigo-500/5",
+                      "hover:border-indigo-500/50"
+                    )}
+                  >
+                    {!notification.is_read && (
+                      <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
+                    )}
 
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110",
-                    notification.type === 'alert' ? "bg-amber-500/10 text-amber-500" : 
-                    notification.type === 'success' ? "bg-emerald-500/10 text-emerald-500" : "bg-indigo-500/10 text-indigo-500"
-                  )}>
-                    {notification.type === 'alert' ? <AlertTriangle size={24} /> : 
-                     notification.type === 'success' ? <CheckCircle2 size={24} /> : <Info size={24} />}
-                  </div>
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110",
+                      notification.type === 'alert' ? "bg-amber-500/10 text-amber-500" : 
+                      notification.type === 'success' ? "bg-emerald-500/10 text-emerald-500" : "bg-indigo-500/10 text-indigo-500"
+                    )}>
+                      {notification.type === 'alert' ? <AlertTriangle size={24} /> : 
+                       notification.type === 'success' ? <CheckCircle2 size={24} /> : <Info size={24} />}
+                    </div>
 
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className={cn(
-                        "text-lg font-bold transition-colors",
-                        notification.is_read ? "text-slate-400" : "text-white group-hover:text-indigo-400"
-                      )}>
-                        {notification.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-widest">
-                        <Clock size={14} />
-                        {format(new Date(notification.created_at), 'MMM d, p')}
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className={cn(
+                          "text-lg font-bold transition-colors",
+                          notification.is_read ? "text-slate-400" : "text-white group-hover:text-indigo-400"
+                        )}>
+                          {notification.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-slate-500 text-xs font-bold uppercase tracking-widest shrink-0">
+                          <Clock size={14} />
+                          {format(new Date(notification.created_at), 'MMM d, p')}
+                        </div>
+                      </div>
+                      <div className="text-slate-400 text-sm leading-relaxed prose prose-invert prose-sm max-w-none prose-p:text-slate-400 prose-p:text-sm prose-headings:text-white prose-strong:text-white prose-a:text-indigo-400">
+                        <SafeMarkdown>{body}</SafeMarkdown>
                       </div>
                     </div>
-                    <p className="text-slate-400 text-sm leading-relaxed">{notification.message}</p>
-                  </div>
 
-                  <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {!notification.is_read && (
-                      <button 
-                        onClick={() => markAsRead(notification.id)}
-                        className="p-2 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl transition-all"
-                        title="Mark as read"
-                      >
-                        <CheckCircle2 size={18} />
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => deleteNotification(notification.id)}
-                      className="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl transition-all"
-                      title="Delete"
+                    <div 
+                      className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <Trash2 size={18} />
-                    </button>
+                      {!notification.is_read && (
+                        <button 
+                          onClick={() => markAsRead(notification.id)}
+                          className="p-2 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl transition-all"
+                          title="Mark as read"
+                        >
+                          <CheckCircle2 size={18} />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => deleteNotification(notification.id)}
+                        className="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl transition-all"
+                        title="Delete"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="py-20 text-center space-y-6 bg-[#161b22] border border-slate-800 rounded-3xl">
                 <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-600">
@@ -185,6 +210,28 @@ export default function StudentNotificationsPage() {
               </div>
             )}
           </div>
+        )}
+
+        {modalNotif && (
+          <>
+            <div className="fixed inset-0 bg-black/60 z-[110]" onClick={() => setModalNotif(null)} />
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 font-bengali">
+              <div className="bg-[#161b22] border border-slate-800 rounded-3xl max-w-lg w-full max-h-[80vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white">{modalNotif.title}</h3>
+                  <button
+                    onClick={() => setModalNotif(null)}
+                    className="p-2 text-slate-500 hover:text-white rounded-xl transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="p-6 overflow-y-auto max-h-[60vh] prose prose-invert prose-sm max-w-none prose-p:text-slate-300 prose-headings:text-white prose-strong:text-white prose-a:text-indigo-400 prose-li:text-slate-300">
+                  <SafeMarkdown>{modalNotif.body ?? modalNotif.message ?? ''}</SafeMarkdown>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </DashboardShell>

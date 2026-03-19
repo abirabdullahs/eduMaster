@@ -167,6 +167,7 @@ export interface Notification {
   body: string;
   is_read: boolean;
   type: NotificationType;
+  action_link?: string | null;
   created_at: string;
 }
 

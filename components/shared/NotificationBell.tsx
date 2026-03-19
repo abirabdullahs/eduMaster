@@ -1,14 +1,22 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, CheckCheck, Inbox, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Bell, CheckCheck, Inbox, X } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
+import SafeMarkdown from '@/components/shared/SafeMarkdown';
+import type { Notification } from '@/lib/types';
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  const [modalNotif, setModalNotif] = useState<Notification | null>(null);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { profile } = useAuth();
+  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,6 +28,18 @@ export default function NotificationBell() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleClick = (n: Notification) => {
+    markAsRead(n.id);
+    const link = (n as any).action_link;
+    if (link) {
+      setIsOpen(false);
+      if (link.startsWith('http')) window.location.href = link;
+      else router.push(link);
+    } else {
+      setModalNotif(n);
+    }
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -56,7 +76,7 @@ export default function NotificationBell() {
                 {notifications.slice(0, 5).map((notification) => (
                   <button
                     key={notification.id}
-                    onClick={() => markAsRead(notification.id)}
+                    onClick={() => handleClick(notification)}
                     className={cn(
                       "w-full p-4 text-left hover:bg-white/5 transition-all space-y-1 relative group",
                       !notification.is_read && "bg-indigo-500/5"
@@ -74,7 +94,7 @@ export default function NotificationBell() {
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                      {notification.body}
+                      {(notification.body || '').replace(/#{1,6}\s/g, '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1')}
                     </p>
                   </button>
                 ))}
@@ -89,12 +109,40 @@ export default function NotificationBell() {
             )}
           </div>
 
-          <div className="p-3 bg-slate-800/20 border-t border-slate-800 text-center">
-            <button className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
-              View all notifications
-            </button>
-          </div>
+          {profile?.role === 'student' && (
+            <div className="p-3 bg-slate-800/20 border-t border-slate-800 text-center">
+              <Link
+                href="/student/notifications"
+                onClick={() => setIsOpen(false)}
+                className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-widest"
+              >
+                View all notifications
+              </Link>
+            </div>
+          )}
         </div>
+      )}
+
+      {modalNotif && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-[110]" onClick={() => setModalNotif(null)} />
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <div className="bg-[#161b22] border border-slate-800 rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-white">{modalNotif.title}</h3>
+                <button
+                  onClick={() => setModalNotif(null)}
+                  className="p-2 text-slate-500 hover:text-white rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[60vh] prose prose-invert prose-sm max-w-none prose-p:text-slate-300 prose-headings:text-white prose-strong:text-white prose-a:text-indigo-400">
+                <SafeMarkdown>{modalNotif.body || ''}</SafeMarkdown>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
