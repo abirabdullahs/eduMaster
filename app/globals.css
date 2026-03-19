@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 @import 'katex/dist/katex.min.css';
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -80,4 +81,8 @@
   .glass-card {
     @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl;
   }
+}
+
+.font-bangla {
+  font-family: 'Hind Siliguri', sans-serif;
 }
