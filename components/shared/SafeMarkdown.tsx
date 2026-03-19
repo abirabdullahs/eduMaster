@@ -2,14 +2,12 @@
 
 import React, { Component, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
 import type { PluggableList } from 'unified';
-
-const rehypePluginsWithMath: PluggableList = [rehypeKatex()];
-const remarkPluginsWithMath: PluggableList = [remarkMath];
 
 interface SafeMarkdownProps {
   children: string;
@@ -46,6 +44,9 @@ export default function SafeMarkdown({
   components,
 }: SafeMarkdownProps) {
   const content = String(children ?? '');
+  const hasMath = /\$|\\\[|\\\]|```math/.test(content);
+  const remarkPlugins: PluggableList = [remarkGfm, ...(hasMath ? [remarkMath] : [])];
+  const rehypePlugins: PluggableList = hasMath ? [rehypeKatex()] : [];
   const fallback = (text: string) => (
     <div
       className={className}
@@ -57,8 +58,8 @@ export default function SafeMarkdown({
   return (
     <MarkdownErrorBoundary key={content} content={content} fallback={fallback}>
       <ReactMarkdown
-        remarkPlugins={remarkPluginsWithMath}
-        rehypePlugins={rehypePluginsWithMath}
+        remarkPlugins={remarkPlugins}
+        rehypePlugins={rehypePlugins}
         components={components}
       >
         {content}

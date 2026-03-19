@@ -9,7 +9,6 @@ import type { FreeContentType } from '@/lib/types';
 
 interface FreeContentViewerProps {
   content: any;
-  onMarkComplete?: () => void;
   onSubmitAnswer?: (answer: string, isCorrect?: boolean) => void;
   isCompleted?: boolean;
   previousAnswer?: string;
@@ -18,7 +17,6 @@ interface FreeContentViewerProps {
 
 export default function FreeContentViewer({
   content,
-  onMarkComplete,
   onSubmitAnswer,
   isCompleted,
   previousAnswer,
@@ -33,14 +31,6 @@ export default function FreeContentViewer({
       return (
         <div className="prose prose-invert prose-indigo max-w-none">
           <SafeMarkdown>{String(data.body ?? '')}</SafeMarkdown>
-          {onMarkComplete && !isCompleted && (
-            <button
-              onClick={onMarkComplete}
-              className="mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"
-            >
-              Mark as Read
-            </button>
-          )}
         </div>
       );
 
@@ -59,14 +49,6 @@ export default function FreeContentViewer({
             </div>
           )}
           {data.caption && <p className="text-slate-400">{data.caption}</p>}
-          {onMarkComplete && !isCompleted && (
-            <button
-              onClick={onMarkComplete}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"
-            >
-              Mark as Watched
-            </button>
-          )}
         </div>
       );
     }
@@ -82,14 +64,6 @@ export default function FreeContentViewer({
               </li>
             ))}
           </ul>
-          {onMarkComplete && !isCompleted && (
-            <button
-              onClick={onMarkComplete}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"
-            >
-              Mark as Read
-            </button>
-          )}
         </div>
       );
 
@@ -138,13 +112,7 @@ export default function FreeContentViewer({
       );
 
     case 'flashcard':
-      return (
-        <FlashcardViewer
-          data={data}
-          onMarkComplete={onMarkComplete}
-          isCompleted={isCompleted}
-        />
-      );
+      return <FlashcardViewer data={data} />;
 
     case 'match_following':
       return (
@@ -169,11 +137,6 @@ export default function FreeContentViewer({
               <SafeMarkdown>{String(data.description ?? '')}</SafeMarkdown>
             </div>
           )}
-          {onMarkComplete && !isCompleted && (
-            <button onClick={onMarkComplete} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl">
-              Mark as Read
-            </button>
-          )}
         </div>
       );
 
@@ -187,11 +150,6 @@ export default function FreeContentViewer({
             <div className="prose prose-invert prose-sm">
               <SafeMarkdown>{String(data.explanation ?? '')}</SafeMarkdown>
             </div>
-          )}
-          {onMarkComplete && !isCompleted && (
-            <button onClick={onMarkComplete} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl">
-              Mark as Read
-            </button>
           )}
         </div>
       );
@@ -509,7 +467,7 @@ function FillBlankViewer({
   );
 }
 
-function FlashcardViewer({ data, onMarkComplete, isCompleted }: { data: any; onMarkComplete?: () => void; isCompleted?: boolean }) {
+function FlashcardViewer({ data }: { data: any }) {
   const [flipped, setFlipped] = useState(false);
   const front = data.front ?? '';
   const back = data.back ?? '';
@@ -546,14 +504,6 @@ function FlashcardViewer({ data, onMarkComplete, isCompleted }: { data: any; onM
         </div>
       </div>
       <p className="text-center text-slate-500 text-sm">Click or tap to flip</p>
-      {onMarkComplete && !isCompleted && (
-        <button
-          onClick={onMarkComplete}
-          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"
-        >
-          Mark as Done
-        </button>
-      )}
     </div>
   );
 }
@@ -646,7 +596,7 @@ function MatchFollowingViewer({
   );
 }
 
-function CodeSnippetViewer({ data, onMarkComplete, isCompleted }: { data: any; onMarkComplete?: () => void; isCompleted?: boolean }) {
+function CodeSnippetViewer({ data }: { data: any }) {
   const [copied, setCopied] = useState(false);
   const code = String(data.code ?? '');
   const lang = String(data.language ?? 'plaintext');
@@ -676,16 +626,11 @@ function CodeSnippetViewer({ data, onMarkComplete, isCompleted }: { data: any; o
           <SafeMarkdown>{String(data.explanation)}</SafeMarkdown>
         </div>
       )}
-      {onMarkComplete && !isCompleted && (
-        <button onClick={onMarkComplete} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl">
-          Mark as Read
-        </button>
-      )}
     </div>
   );
 }
 
-function MnemonicViewer({ data, onMarkComplete, isCompleted }: { data: any; onMarkComplete?: () => void; isCompleted?: boolean }) {
+function MnemonicViewer({ data }: { data: any }) {
   return (
     <div className="space-y-4">
       <div className="p-8 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-2xl text-center">
@@ -696,11 +641,6 @@ function MnemonicViewer({ data, onMarkComplete, isCompleted }: { data: any; onMa
         <div className="prose prose-invert prose-sm max-w-none">
           <SafeMarkdown>{String(data.breakdown)}</SafeMarkdown>
         </div>
-      )}
-      {onMarkComplete && !isCompleted && (
-        <button onClick={onMarkComplete} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl">
-          Mark as Done
-        </button>
       )}
     </div>
   );
