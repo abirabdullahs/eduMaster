@@ -132,6 +132,8 @@ export default function AdminFreeContentPage() {
       .update({ name, description: description || null })
       .eq('id', editingSubject.id);
     if (!error) {
+      const { logAdminActivity } = await import('@/lib/admin-activity');
+      logAdminActivity({ activity_type: 'free_subject_updated', title: `Edited free subject: ${name}`, entity_type: 'free_content', entity_id: editingSubject.id, href: `/admin/free-content/${editingSubject.id}` });
       setEditingSubject(null);
       fetchData();
     } else throw new Error(error.message);

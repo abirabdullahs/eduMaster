@@ -91,6 +91,15 @@ export default function NewCoursePage() {
 
       if (insertError) throw insertError;
 
+      const { logAdminActivity } = await import('@/lib/admin-activity');
+      logAdminActivity({
+        activity_type: 'course_created',
+        title: `Created course: ${data.title}`,
+        entity_type: 'course',
+        entity_id: data.id,
+        href: `/admin/courses/${data.id}`,
+      });
+
       router.push(`/admin/courses/${data.id}`);
     } catch (err: any) {
       setError(err.message || 'Failed to create course');

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Course } from '@/lib/types';
+import { logAdminActivity } from '@/lib/admin-activity';
 import { formatPrice } from '@/lib/utils';
 import ContentTree from '@/components/courses/ContentTree';
 import { SubjectForm, ChapterForm, LectureForm } from '@/components/courses/forms/CourseContentForms';
@@ -144,6 +145,7 @@ export default function CourseDetailPage() {
         .eq('id', courseId);
       
       if (error) throw error;
+      logAdminActivity({ activity_type: 'course_updated', title: `Updated course: ${settingsForm.title}`, entity_type: 'course', entity_id: courseId as string, href: `/admin/courses/${courseId}` });
       alert('Settings updated successfully!');
       setRefreshKey(prev => prev + 1);
     } catch (err: any) {
@@ -233,9 +235,11 @@ export default function CourseDetailPage() {
       };
     }
     try {
+      let itemId = editingItem?.id;
       if (editingItem) {
         const { error } = await supabase.from(table).update(payload).eq('id', editingItem.id);
         if (error) throw error;
+        itemId = editingItem.id;
       } else {
         const insertData = { ...payload };
         if (type === 'subject') {
@@ -257,10 +261,14 @@ export default function CourseDetailPage() {
           insertData.order_index = parentChapter?.lectures?.length ?? 0;
         }
         
-        const { error } = await supabase.from(table).insert(insertData);
+        const { data: inserted, error } = await supabase.from(table).insert(insertData).select('id').single();
         if (error) throw error;
+        itemId = inserted?.id;
       }
       
+      const action = editingItem ? 'Edited' : 'Added';
+      const name = payload.title || data.title || type;
+      logAdminActivity({ activity_type: `${type}_${editingItem ? 'updated' : 'created'}`, title: `${action} ${type}: ${name}`, entity_type: 'course', entity_id: courseId as string, href: `/admin/courses/${courseId}` });
       setRefreshKey(prev => prev + 1);
       setIsSubjectModalOpen(false);
       setIsChapterModalOpen(false);

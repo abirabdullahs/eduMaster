@@ -77,14 +77,17 @@ export default function AdminTeachers() {
 
   const handleStatusUpdate = async (id: string, newStatus: 'active' | 'rejected') => {
     try {
+      const teacher = teachers.find(t => t.id === id);
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ status: newStatus })
         .eq('id', id);
 
       if (updateError) throw updateError;
+
+      const { logAdminActivity } = await import('@/lib/admin-activity');
+      logAdminActivity({ activity_type: `teacher_${newStatus}`, title: `${newStatus === 'active' ? 'Approved' : 'Rejected'} teacher: ${teacher?.name || 'Unknown'}`, entity_type: 'teacher', entity_id: id, href: '/admin/teachers' });
       
-      // Refresh list
       fetchTeachers();
     } catch (err: any) {
       alert(err.message || 'Failed to update status');

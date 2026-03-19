@@ -374,6 +374,8 @@ export default function AdminFreeSubjectPage() {
               .from('free_chapters')
               .insert({ subject_id: subjectId, name, order_index: chapters.length });
             if (!error) {
+              const { logAdminActivity } = await import('@/lib/admin-activity');
+              logAdminActivity({ activity_type: 'free_chapter_created', title: `Added chapter: ${name}`, entity_type: 'free_content', entity_id: subjectId, href: `/admin/free-content/${subjectId}` });
               setAddingChapter(false);
               fetchData();
             } else throw new Error(error.message);
@@ -392,6 +394,8 @@ export default function AdminFreeSubjectPage() {
               .update({ name, description: description || null })
               .eq('id', subject.id);
             if (!error) {
+              const { logAdminActivity } = await import('@/lib/admin-activity');
+              logAdminActivity({ activity_type: 'free_subject_updated', title: `Edited subject: ${name}`, entity_type: 'free_content', entity_id: subject.id, href: `/admin/free-content/${subject.id}` });
               setEditingSubject(false);
               fetchData();
             } else throw new Error(error.message);
@@ -412,6 +416,8 @@ export default function AdminFreeSubjectPage() {
               .from('free_topics')
               .insert({ chapter_id: addingTopic.chapterId, name, order_index: len });
             if (!error) {
+              const { logAdminActivity } = await import('@/lib/admin-activity');
+              logAdminActivity({ activity_type: 'free_topic_created', title: `Added topic: ${name}`, entity_type: 'free_content', entity_id: subjectId, href: `/admin/free-content/${subjectId}` });
               setAddingTopic(null);
               fetchData();
             } else throw new Error(error.message);

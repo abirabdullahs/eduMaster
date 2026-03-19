@@ -119,6 +119,9 @@ export default function AdminStudents() {
         });
 
       if (error) throw error;
+
+      const { logAdminActivity } = await import('@/lib/admin-activity');
+      logAdminActivity({ activity_type: 'enrollment_manual', title: `Enrolled ${selectedStudent?.name} in ${course?.title}`, entity_type: 'enrollment', href: '/admin/students' });
       
       fetchStudentDetails(selectedStudent.id);
       setIsEnrollModalOpen(false);

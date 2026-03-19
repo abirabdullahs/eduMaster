@@ -40,9 +40,20 @@ interface RecentEnrollment {
   courses: { title: string } | null;
 }
 
+interface AdminActivityItem {
+  id: string;
+  activity_type: string;
+  title: string;
+  entity_type: string;
+  entity_id: string | null;
+  href: string;
+  created_at: string;
+}
+
 export default function AdminOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentEnrollment[]>([]);
+  const [adminActivity, setAdminActivity] = useState<AdminActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -78,6 +89,10 @@ export default function AdminOverview() {
             courses (title)
           `).order('created_at', { ascending: false }).limit(8)
         ]);
+
+        const activityRes = await fetch('/api/admin/activity?limit=4');
+        const activityData = await activityRes.json();
+        setAdminActivity(activityData.activities || []);
 
         setStats({
           totalStudents: studentsCount || 0,
@@ -166,13 +181,52 @@ export default function AdminOverview() {
         })}
       </div>
 
+      {/* Admin Activity - Your recent actions */}
+      <div className="bg-[#161b22] border border-slate-800 rounded-3xl overflow-hidden">
+        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Clock size={20} className="text-indigo-500" />
+            Your Recent Actions
+          </h3>
+          <Link href="/admin/activity" className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
+            See All (48h)
+          </Link>
+        </div>
+        <div className="p-6">
+          {loading ? (
+            <div className="py-6 text-center text-slate-500">Loading...</div>
+          ) : adminActivity.length === 0 ? (
+            <div className="py-8 text-center text-slate-500">No admin actions yet. Create a course, approve enrollments, or add free content.</div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {adminActivity.map((a) => (
+                <Link
+                  key={a.id}
+                  href={a.href}
+                  className="flex items-start gap-3 p-4 rounded-2xl bg-[#0d1117] border border-slate-800 hover:border-indigo-500/50 transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0">
+                    {a.entity_type === 'course' ? <BookOpen size={18} /> : a.entity_type === 'enrollment' ? <CreditCard size={18} /> : a.entity_type === 'teacher' ? <GraduationCap size={18} /> : <FileText size={18} />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white line-clamp-2 group-hover:text-indigo-400">{a.title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}</p>
+                  </div>
+                  <ArrowUpRight size={14} className="text-slate-500 group-hover:text-white shrink-0" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent Activity */}
+        {/* Recent Enrollments */}
         <div className="lg:col-span-2 bg-[#161b22] border border-slate-800 rounded-3xl overflow-hidden">
           <div className="p-6 border-b border-slate-800 flex items-center justify-between">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <TrendingUp size={20} className="text-indigo-500" />
-              Recent Activity
+              Recent Enrollments
             </h3>
             <Link href="/admin/enrollments" className="text-xs font-bold text-slate-500 hover:text-white transition-colors">View All</Link>
           </div>

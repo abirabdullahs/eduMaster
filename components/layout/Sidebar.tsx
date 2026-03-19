@@ -11,6 +11,7 @@ import {
   FileText, 
   Bell, 
   Calendar, 
+  Clock,
   GraduationCap, 
   CreditCard,
   Banknote,
@@ -35,6 +36,7 @@ interface SidebarLink {
 const sidebarLinks: SidebarLink[] = [
   // Admin Links
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, roles: ['admin'] },
+  { href: '/admin/activity', label: 'Activity Log', icon: Clock, roles: ['admin'] },
   { href: '/admin/teachers?tab=pending', label: 'Teacher Requests', icon: UserCheck, roles: ['admin'] },
   { href: '/admin/teachers', label: 'Teachers', icon: GraduationCap, roles: ['admin'] },
   { href: '/admin/students', label: 'Students', icon: Users, roles: ['admin'] },

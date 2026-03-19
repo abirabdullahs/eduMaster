@@ -65,6 +65,8 @@ export default function NewFreeSubjectPage() {
       alert(error.message);
       return;
     }
+    const { logAdminActivity } = await import('@/lib/admin-activity');
+    logAdminActivity({ activity_type: 'free_subject_created', title: `Added free subject: ${data.name}`, entity_type: 'free_content', entity_id: subj.id, href: `/admin/free-content/${subj.id}` });
     router.push(`/admin/free-content/${subj.id}`);
   };
 
