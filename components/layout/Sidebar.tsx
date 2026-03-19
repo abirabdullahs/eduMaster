@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Users, 
+  User,
   UserCheck, 
   BookOpen, 
   FileText, 
@@ -52,6 +53,7 @@ const sidebarLinks: SidebarLink[] = [
 
   // Student Links
   { href: '/student', label: 'My Dashboard', icon: LayoutDashboard, roles: ['student'] },
+  { href: '/student/profile', label: 'Profile', icon: User, roles: ['student'] },
   { href: '/learn', label: 'Free Learning', icon: BookOpen, roles: ['student'] },
   { href: '/student/courses', label: 'My Courses', icon: BookOpen, roles: ['student'] },
   { href: '/student/exams', label: 'My Exams', icon: FileText, roles: ['student'] },
