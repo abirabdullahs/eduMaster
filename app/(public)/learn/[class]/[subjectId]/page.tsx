@@ -283,7 +283,7 @@ export default function LearnSubjectPage() {
                               is_correct: progress[currentContent.id]?.is_correct ?? null,
                             }),
                           });
-                          setProgress(p => ({ ...p, [currentContent.id]: { status: 'completed', ...p[currentContent.id] } }));
+                          setProgress(p => ({ ...p, [currentContent.id]: { ...p[currentContent.id], status: 'completed' } }));
                         }
                         setContentIndex(i => Math.min(contents.length - 1, i + 1));
                       }}
