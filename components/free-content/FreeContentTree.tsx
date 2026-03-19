@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, ChevronDown, ChevronRight, Trash2, Edit3, GripVertical, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { FreeContentType } from '@/lib/types';
@@ -55,21 +55,8 @@ export default function FreeContentTree({
   isContentTypeOpen,
   onCloseContentType,
 }: FreeContentTreeProps) {
-  const allTopicIds = chapters.flatMap((c: any) => (c.topics || []).map((t: any) => t.id));
-  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set(chapters.map((c: any) => c.id)));
-  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(() => new Set(allTopicIds));
-
-  // Keep expandedTopics in sync when chapters/topics change (e.g. new topic added)
-  useEffect(() => {
-    setExpandedTopics(prev => {
-      const next = new Set(prev);
-      let changed = false;
-      for (const id of allTopicIds) {
-        if (!next.has(id)) { next.add(id); changed = true; }
-      }
-      return changed ? next : prev;
-    });
-  }, [allTopicIds.join(',')]);
+  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(() => new Set());
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(() => new Set());
   const [pendingTopicForContent, setPendingTopicForContent] = useState<string | null>(null);
 
   const sensors = useSensors(
