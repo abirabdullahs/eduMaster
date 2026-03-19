@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, ChevronDown, ChevronRight, Trash2, Edit3, GripVertical, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { FreeContentType } from '@/lib/types';
@@ -55,7 +55,21 @@ export default function FreeContentTree({
   isContentTypeOpen,
   onCloseContentType,
 }: FreeContentTreeProps) {
+  const allTopicIds = chapters.flatMap((c: any) => (c.topics || []).map((t: any) => t.id));
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set(chapters.map((c: any) => c.id)));
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(() => new Set(allTopicIds));
+
+  // Keep expandedTopics in sync when chapters/topics change (e.g. new topic added)
+  useEffect(() => {
+    setExpandedTopics(prev => {
+      const next = new Set(prev);
+      let changed = false;
+      for (const id of allTopicIds) {
+        if (!next.has(id)) { next.add(id); changed = true; }
+      }
+      return changed ? next : prev;
+    });
+  }, [allTopicIds.join(',')]);
   const [pendingTopicForContent, setPendingTopicForContent] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -65,6 +79,15 @@ export default function FreeContentTree({
 
   const toggleChapter = (id: string) => {
     setExpandedChapters(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleTopic = (id: string) => {
+    setExpandedTopics(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -130,9 +153,17 @@ export default function FreeContentTree({
               <div className="pl-8 pr-4 pb-4 space-y-2">
                 {(chapter.topics || []).map((topic: any) => (
                   <div key={topic.id} className="bg-[#0d1117] rounded-xl border border-slate-800 overflow-hidden">
-                    <div className="flex items-center justify-between p-3">
+                    <div
+                      className="flex items-center gap-2 p-3 cursor-pointer hover:bg-white/5"
+                      onClick={() => toggleTopic(topic.id)}
+                    >
+                      {expandedTopics.has(topic.id) ? (
+                        <ChevronDown size={16} className="text-slate-500 shrink-0" />
+                      ) : (
+                        <ChevronRight size={16} className="text-slate-500 shrink-0" />
+                      )}
                       <span className="font-medium text-slate-300 flex-1">{topic.name}</span>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => onEditTopic(topic, chapter.id)}
                           className="p-1.5 text-slate-500 hover:text-indigo-400 rounded-lg"
@@ -155,7 +186,8 @@ export default function FreeContentTree({
                         </button>
                       </div>
                     </div>
-                    <div className="px-3 pb-3 space-y-1">
+                    {expandedTopics.has(topic.id) && (
+                    <div className="px-3 pb-3 space-y-1 pl-6">
                       <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
@@ -184,6 +216,7 @@ export default function FreeContentTree({
                         <p className="text-xs text-slate-600 italic px-3 py-2">No content yet. Drag to reorder when you add content.</p>
                       )}
                     </div>
+                    )}
                   </div>
                 ))}
                 {(!chapter.topics || chapter.topics.length === 0) && (
