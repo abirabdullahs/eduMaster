@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
 
 interface DashboardStats {
   totalStudents: number;
@@ -26,28 +27,56 @@ interface DashboardStats {
   totalCourses: number;
   pendingEnrollments: number;
   pendingTeachers: number;
+  newStudentsThisWeek: number;
+  newTeachersThisWeek: number;
+  newCoursesThisWeek: number;
+}
+
+interface RecentEnrollment {
+  id: string;
+  created_at: string;
+  status: string;
+  profiles: { name: string; email?: string } | null;
+  courses: { title: string } | null;
 }
 
 export default function AdminOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentActivity, setRecentActivity] = useState<RecentEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
     async function fetchStats() {
       try {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const weekAgoIso = weekAgo.toISOString();
+
         const [
           { count: studentsCount },
           { count: teachersCount },
           { count: coursesCount },
           { count: pendingEnrollmentsCount },
-          { count: pendingTeachersCount }
+          { count: pendingTeachersCount },
+          { count: newStudentsThisWeek },
+          { count: newTeachersThisWeek },
+          { count: newCoursesThisWeek },
+          { data: recentEnrollments }
         ] = await Promise.all([
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'teacher').eq('status', 'active'),
           supabase.from('courses').select('*', { count: 'exact', head: true }),
           supabase.from('enrollments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
           supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'teacher').eq('status', 'pending'),
+          supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student').gte('created_at', weekAgoIso),
+          supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'teacher').gte('created_at', weekAgoIso),
+          supabase.from('courses').select('*', { count: 'exact', head: true }).gte('created_at', weekAgoIso),
+          supabase.from('enrollments').select(`
+            id, created_at, status,
+            profiles:student_id (name, email),
+            courses (title)
+          `).order('created_at', { ascending: false }).limit(8)
         ]);
 
         setStats({
@@ -56,7 +85,11 @@ export default function AdminOverview() {
           totalCourses: coursesCount || 0,
           pendingEnrollments: pendingEnrollmentsCount || 0,
           pendingTeachers: pendingTeachersCount || 0,
+          newStudentsThisWeek: newStudentsThisWeek || 0,
+          newTeachersThisWeek: newTeachersThisWeek || 0,
+          newCoursesThisWeek: newCoursesThisWeek || 0,
         });
+        setRecentActivity((recentEnrollments || []) as RecentEnrollment[]);
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {
@@ -68,9 +101,9 @@ export default function AdminOverview() {
   }, [supabase]);
 
   const statCards = [
-    { label: 'Total Students', value: stats?.totalStudents || 0, icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-500/10', trend: '+12%' },
-    { label: 'Active Teachers', value: stats?.totalTeachers || 0, icon: GraduationCap, color: 'text-emerald-500', bg: 'bg-emerald-500/10', trend: '+5%' },
-    { label: 'Total Courses', value: stats?.totalCourses || 0, icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-500/10', trend: '+2' },
+    { label: 'Total Students', value: stats?.totalStudents || 0, icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-500/10', trend: stats?.newStudentsThisWeek ? `+${stats.newStudentsThisWeek} this week` : 'Live', href: undefined as string | undefined },
+    { label: 'Active Teachers', value: stats?.totalTeachers || 0, icon: GraduationCap, color: 'text-emerald-500', bg: 'bg-emerald-500/10', trend: stats?.newTeachersThisWeek ? `+${stats.newTeachersThisWeek} this week` : 'Live', href: undefined as string | undefined },
+    { label: 'Total Courses', value: stats?.totalCourses || 0, icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-500/10', trend: stats?.newCoursesThisWeek ? `+${stats.newCoursesThisWeek} this week` : 'Live', href: undefined as string | undefined },
     { label: 'Pending Enrollments', value: stats?.pendingEnrollments || 0, icon: CreditCard, color: 'text-amber-500', bg: 'bg-amber-500/10', trend: 'Critical', href: '/admin/enrollments' },
     { label: 'Teacher Requests', value: stats?.pendingTeachers || 0, icon: UserCheck, color: 'text-blue-500', bg: 'bg-blue-500/10', trend: 'New', href: '/admin/teachers?tab=pending' },
   ];
@@ -113,7 +146,8 @@ export default function AdminOverview() {
                 </div>
                 <div className={cn(
                   "px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider",
-                  stat.trend === 'Critical' ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"
+                  stat.trend === 'Critical' ? "bg-red-500/10 text-red-500" :
+                  stat.trend === 'New' ? "bg-blue-500/10 text-blue-500" : "bg-emerald-500/10 text-emerald-500"
                 )}>
                   {stat.trend}
                 </div>
@@ -140,25 +174,35 @@ export default function AdminOverview() {
               <TrendingUp size={20} className="text-indigo-500" />
               Recent Activity
             </h3>
-            <button className="text-xs font-bold text-slate-500 hover:text-white transition-colors">View All</button>
+            <Link href="/admin/enrollments" className="text-xs font-bold text-slate-500 hover:text-white transition-colors">View All</Link>
           </div>
           <div className="p-6 space-y-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-start gap-4 group">
-                <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
-                  <Clock size={18} />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm text-white font-medium">
-                    <span className="text-indigo-400 font-bold">Arif Ahmed</span> enrolled in <span className="text-purple-400 font-bold">Physics Masterclass</span>
-                  </p>
-                  <p className="text-xs text-slate-500">2 hours ago • Enrollment #12345</p>
-                </div>
-                <button className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-white transition-all">
-                  <ArrowUpRight size={16} />
-                </button>
-              </div>
-            ))}
+            {loading ? (
+              <div className="py-8 text-center text-slate-500">Loading activity...</div>
+            ) : recentActivity.length === 0 ? (
+              <div className="py-8 text-center text-slate-500">No recent enrollments yet.</div>
+            ) : (
+              recentActivity.map((e) => {
+                const studentName = (e.profiles as { name?: string } | null)?.name || 'Unknown';
+                const courseTitle = (e.courses as { title?: string } | null)?.title || 'Unknown Course';
+                return (
+                  <Link key={e.id} href="/admin/enrollments" className="flex items-start gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                      <Clock size={18} />
+                    </div>
+                    <div className="flex-1 space-y-1 min-w-0">
+                      <p className="text-sm text-white font-medium">
+                        <span className="text-indigo-400 font-bold">{studentName}</span> enrolled in <span className="text-purple-400 font-bold">{courseTitle}</span>
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {formatDistanceToNow(new Date(e.created_at), { addSuffix: true })} • {e.status}
+                      </p>
+                    </div>
+                    <ArrowUpRight size={16} className="text-slate-500 group-hover:text-white transition-colors shrink-0" />
+                  </Link>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -194,15 +238,8 @@ export default function AdminOverview() {
                 <span className="text-indigo-100">Database</span>
                 <span className="flex items-center gap-1.5 font-bold">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  Healthy
+                  {loading ? '...' : 'Connected'}
                 </span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-indigo-100">Storage</span>
-                <span className="font-bold">45% Used</span>
-              </div>
-              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                <div className="w-[45%] h-full bg-white" />
               </div>
             </div>
           </div>
