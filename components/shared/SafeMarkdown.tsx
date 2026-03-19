@@ -44,9 +44,9 @@ export default function SafeMarkdown({
   components,
 }: SafeMarkdownProps) {
   const content = String(children ?? '');
-  const hasMath = /\$|\\\[|\\\]|```math/.test(content);
+  const hasMath = /\$\$|\$|\\\[|\\\]|\\frac|```math/.test(content);
   const remarkPlugins: PluggableList = [remarkGfm, ...(hasMath ? [remarkMath] : [])];
-  const rehypePlugins: PluggableList = hasMath ? [rehypeKatex()] : [];
+  const rehypePlugins: PluggableList = hasMath ? [rehypeKatex({ throwOnError: false, strict: false })] : [];
   const fallback = (text: string) => (
     <div
       className={className}

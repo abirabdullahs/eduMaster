@@ -39,15 +39,76 @@ export async function GET(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     const { searchParams } = new URL(req.url);
     const topic_id = searchParams.get('topic_id');
+    const subject_id = searchParams.get('subject_id');
 
     if (!user) return NextResponse.json({ progress: [] });
-    if (!topic_id) return NextResponse.json({ error: 'topic_id required' }, { status: 400 });
+
+    // Resume position for subject: returns { topic_id, content_index }
+    if (subject_id) {
+      const { data: chaps } = await supabase
+        .from('free_chapters')
+        .select(`
+          id,
+          topics:free_topics (id, order_index)
+        `)
+        .eq('subject_id', subject_id)
+        .order('order_index');
+      const topicIds: string[] = [];
+      (chaps || []).forEach((c: { topics?: { id: string; order_index?: number }[] }) => {
+        const sorted = (c.topics || []).sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+        sorted.forEach((t) => topicIds.push(t.id));
+      });
+
+      if (topicIds.length === 0) {
+        return NextResponse.json({ resume: null });
+      }
+
+      const { data: contents } = await supabase
+        .from('free_contents')
+        .select('id, topic_id, order_index')
+        .in('topic_id', topicIds);
+
+      const { data: progress } = await supabase
+        .from('free_content_progress')
+        .select('content_id, status')
+        .eq('user_id', user.id)
+        .in('content_id', (contents || []).map((c: { id: string }) => c.id));
+
+      const completedIds = new Set(
+        (progress || []).filter((p: { status: string }) => p.status === 'completed').map((p: { content_id: string }) => p.content_id)
+      );
+
+      const byTopic = (contents || []).reduce((acc: Record<string, { id: string; order_index: number }[]>, c: { id: string; topic_id: string; order_index: number }) => {
+        if (!acc[c.topic_id]) acc[c.topic_id] = [];
+        acc[c.topic_id].push({ id: c.id, order_index: c.order_index });
+        return acc;
+      }, {});
+
+      for (const tid of topicIds) {
+        const list = (byTopic[tid] || []).sort((a, b) => a.order_index - b.order_index);
+        for (let i = 0; i < list.length; i++) {
+          if (!completedIds.has(list[i].id)) {
+            return NextResponse.json({ resume: { topic_id: tid, content_index: i } });
+          }
+        }
+      }
+      const lastTid = topicIds[topicIds.length - 1];
+      const lastList = (byTopic[lastTid] || []).sort((a, b) => a.order_index - b.order_index);
+      return NextResponse.json({
+        resume: {
+          topic_id: lastTid || topicIds[0],
+          content_index: Math.max(0, lastList.length - 1),
+        },
+      });
+    }
+
+    if (!topic_id) return NextResponse.json({ error: 'topic_id or subject_id required' }, { status: 400 });
 
     const { data: contents } = await supabase
       .from('free_contents')
       .select('id')
       .eq('topic_id', topic_id);
-    const ids = (contents || []).map(c => c.id);
+    const ids = (contents || []).map((c: { id: string }) => c.id);
 
     const { data: progress } = await supabase
       .from('free_content_progress')
@@ -56,7 +117,7 @@ export async function GET(req: NextRequest) {
       .in('content_id', ids);
 
     const map: Record<string, { status: string; answer_given?: string; is_correct?: boolean }> = {};
-    (progress || []).forEach(p => {
+    (progress || []).forEach((p: { content_id: string; status: string; answer_given?: string; is_correct?: boolean }) => {
       map[p.content_id] = {
         status: p.status,
         answer_given: p.answer_given ?? undefined,

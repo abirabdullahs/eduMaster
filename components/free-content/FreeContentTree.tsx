@@ -4,6 +4,23 @@ import { useState } from 'react';
 import { Plus, ChevronDown, ChevronRight, Trash2, Edit3, GripVertical, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { FreeContentType } from '@/lib/types';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface FreeContentTreeProps {
   chapters: any[];
@@ -18,6 +35,7 @@ interface FreeContentTreeProps {
   onDeleteChapter: (chapter: any) => void;
   onEditTopic: (topic: any, chapterId: string) => void;
   onDeleteTopic: (topic: any) => void;
+  onReorderContent: (topicId: string, items: any[]) => void;
   isContentTypeOpen: boolean;
   onCloseContentType: () => void;
 }
@@ -33,11 +51,17 @@ export default function FreeContentTree({
   onDeleteChapter,
   onEditTopic,
   onDeleteTopic,
+  onReorderContent,
   isContentTypeOpen,
   onCloseContentType,
 }: FreeContentTreeProps) {
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set(chapters.map((c: any) => c.id)));
   const [pendingTopicForContent, setPendingTopicForContent] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const toggleChapter = (id: string) => {
     setExpandedChapters(prev => {
@@ -132,24 +156,32 @@ export default function FreeContentTree({
                       </div>
                     </div>
                     <div className="px-3 pb-3 space-y-1">
-                      {(topic.contents || []).map((content: any) => (
-                        <div
-                          key={content.id}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10"
-                        >
-                          <FileText size={14} className="text-slate-500" />
-                          <span className="text-sm text-slate-400 flex-1">{content.title}</span>
-                          <span className="text-[10px] text-slate-600 uppercase">{content.content_type}</span>
-                          <button
-                            onClick={() => onEditContent(content)}
-                            className="p-1 text-slate-500 hover:text-white"
-                          >
-                            <Edit3 size={14} />
-                          </button>
-                        </div>
-                      ))}
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={(e: DragEndEvent) => {
+                          const { active, over } = e;
+                          if (!over || active.id === over.id) return;
+                          const contents = (topic.contents || []);
+                          const oldIdx = contents.findIndex((c: any) => c.id === active.id);
+                          const newIdx = contents.findIndex((c: any) => c.id === over.id);
+                          if (oldIdx >= 0 && newIdx >= 0) {
+                            onReorderContent(topic.id, arrayMove(contents, oldIdx, newIdx));
+                          }
+                        }}
+                      >
+                        <SortableContext items={(topic.contents || []).map((c: any) => c.id)} strategy={verticalListSortingStrategy}>
+                          {(topic.contents || []).map((content: any) => (
+                            <SortableContentItem
+                              key={content.id}
+                              content={content}
+                              onEdit={() => onEditContent(content)}
+                            />
+                          ))}
+                        </SortableContext>
+                      </DndContext>
                       {(!topic.contents || topic.contents.length === 0) && (
-                        <p className="text-xs text-slate-600 italic px-3 py-2">No content yet</p>
+                        <p className="text-xs text-slate-600 italic px-3 py-2">No content yet. Drag to reorder when you add content.</p>
                       )}
                     </div>
                   </div>
@@ -162,6 +194,31 @@ export default function FreeContentTree({
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function SortableContentItem({ content, onEdit }: { content: any; onEdit: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: content.id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10",
+        isDragging && "opacity-50 shadow-lg z-10"
+      )}
+    >
+      <button {...attributes} {...listeners} className="p-1 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing">
+        <GripVertical size={14} />
+      </button>
+      <FileText size={14} className="text-slate-500 shrink-0" />
+      <span className="text-sm text-slate-400 flex-1">{content.title}</span>
+      <span className="text-[10px] text-slate-600 uppercase">{content.content_type}</span>
+      <button onClick={onEdit} className="p-1 text-slate-500 hover:text-white">
+        <Edit3 size={14} />
+      </button>
     </div>
   );
 }

@@ -198,6 +198,16 @@ export default function AdminFreeSubjectPage() {
           onDeleteChapter={handleDeleteChapter}
           onEditTopic={handleEditTopic}
           onDeleteTopic={handleDeleteTopic}
+          onReorderContent={async (topicId, items) => {
+            try {
+              for (let i = 0; i < items.length; i++) {
+                await supabase.from('free_contents').update({ order_index: i }).eq('id', items[i].id);
+              }
+              fetchData();
+            } catch (err: any) {
+              alert('Failed to reorder: ' + err.message);
+            }
+          }}
           isContentTypeOpen={!!contentTypeModal}
           onCloseContentType={() => setContentTypeModal(null)}
         />

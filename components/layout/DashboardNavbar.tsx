@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Search, User, LogOut, Settings, Menu } from 'lucide-react';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import ViewToggle from './ViewToggle';
 import NotificationBell from '../shared/NotificationBell';
 import { useSidebar } from '@/lib/context/SidebarContext';
@@ -12,6 +12,7 @@ export default function DashboardNavbar() {
   const { user, profile, signOut } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
+  const closeMenu = () => setIsProfileOpen(false);
 
   return (
     <header className="h-16 md:h-20 bg-[#0a0e17]/80 backdrop-blur-md border-b border-slate-800 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
@@ -60,14 +61,22 @@ export default function DashboardNavbar() {
                   <p className="text-sm font-bold text-white">{profile?.name}</p>
                   <p className="text-xs text-slate-500 truncate">{profile?.email}</p>
                 </div>
-                <button className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-all">
+                <Link
+                  href={profile?.role === 'student' ? '/student/profile' : '/settings'}
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-all"
+                >
                   <User size={16} />
                   Profile
-                </button>
-                <button className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-all">
+                </Link>
+                <Link
+                  href="/settings"
+                  onClick={closeMenu}
+                  className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-all"
+                >
                   <Settings size={16} />
                   Settings
-                </button>
+                </Link>
                 <div className="h-px bg-slate-800 my-2" />
                 <button 
                   onClick={() => signOut()}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
@@ -17,6 +17,7 @@ export default function LearnSubjectPage() {
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
   const [contents, setContents] = useState<any[]>([]);
   const [contentIndex, setContentIndex] = useState(0);
+  const resumeIndexRef = useRef<number | null>(null);
   const [progress, setProgress] = useState<Record<string, { status: string; answer_given?: string; is_correct?: boolean }>>({});
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false); // false on mobile so menu hidden initially
@@ -52,16 +53,36 @@ export default function LearnSubjectPage() {
       })).sort((a: any, b: any) => a.order_index - b.order_index);
       setChapters(sorted);
 
-      if (sorted.length > 0 && sorted[0].topics?.length > 0) {
-        const firstTopic = sorted[0].topics[0];
-        setSelectedTopic(firstTopic);
+      const allTopics = sorted.flatMap((c: any) => c.topics || []);
+
+      if (allTopics.length === 0) {
+        setLoading(false);
+        return;
       }
+
+      let initialTopic = allTopics[0];
+      let initialIndex = 0;
+
+      if (user) {
+        const res = await fetch(`/api/free-content/progress?subject_id=${subjectId}`);
+        const data = await res.json();
+        if (data.resume?.topic_id && data.resume?.content_index != null) {
+          const t = allTopics.find((x: any) => x.id === data.resume.topic_id);
+          if (t) {
+            initialTopic = t;
+            initialIndex = data.resume.content_index;
+          }
+        }
+      }
+
+      setSelectedTopic(initialTopic);
+      resumeIndexRef.current = initialIndex;
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [subjectId, supabase]);
+  }, [subjectId, supabase, user]);
 
   useEffect(() => {
     fetchData();
@@ -74,8 +95,13 @@ export default function LearnSubjectPage() {
       .select('*')
       .eq('topic_id', selectedTopic.id)
       .order('order_index')
-      .then(({ data }) => setContents(data || []));
-    setContentIndex(0);
+      .then(({ data }) => {
+        const list = data || [];
+        setContents(list);
+        const idx = resumeIndexRef.current;
+        resumeIndexRef.current = null;
+        setContentIndex(idx !== null ? Math.min(idx, Math.max(0, list.length - 1)) : 0);
+      });
   }, [selectedTopic?.id, supabase]);
 
   useEffect(() => {

@@ -101,19 +101,18 @@ export default function FreeContentForms({ topicId, contentType, initialData, on
         });
         contentData = { ...formData, correct_pairs: pairs };
       }
-      const payload = {
+      const payload: Record<string, unknown> = {
         topic_id: topicId,
         title,
         content_type: contentType,
         content_data: contentData,
         is_free_preview: isFreePreview,
-        order_index: 0,
       };
       if (initialData?.id) {
         await supabase.from('free_contents').update(payload).eq('id', initialData.id);
       } else {
         const { data: contents } = await supabase.from('free_contents').select('id').eq('topic_id', topicId);
-        payload.order_index = (contents?.length ?? 0);
+        payload.order_index = contents?.length ?? 0;
         await supabase.from('free_contents').insert(payload);
       }
       onSuccess();

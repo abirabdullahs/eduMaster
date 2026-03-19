@@ -15,21 +15,35 @@ export default function LatexRenderer({ content, className }: LatexRendererProps
   useEffect(() => {
     if (containerRef.current) {
       // Replace $...$ with inline math and $$...$$ with block math
+      const katexOpts = { throwOnError: false, strict: false };
       const processLatex = (text: string) => {
-        // First handle block math $$...$$
-        let processed = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, p1) => {
+        const trimmed = text.trim();
+        if (!trimmed) return '';
+
+        // If no $ delimiters, treat entire content as display math (raw LaTeX)
+        if (!trimmed.includes('$')) {
           try {
-            return katex.renderToString(p1, { displayMode: true, throwOnError: false });
+            return katex.renderToString(trimmed, { ...katexOpts, displayMode: true });
+          } catch (e) {
+            console.error('KaTeX error:', e);
+            return trimmed;
+          }
+        }
+
+        // Block math $$...$$
+        let processed = trimmed.replace(/\$\$([\s\S]*?)\$\$/g, (match, p1) => {
+          try {
+            return katex.renderToString(p1.trim(), { ...katexOpts, displayMode: true });
           } catch (e) {
             console.error('KaTeX error:', e);
             return match;
           }
         });
 
-        // Then handle inline math $...$
-        processed = processed.replace(/\$(.*?)\$/g, (match, p1) => {
+        // Inline math $...$
+        processed = processed.replace(/\$([^$]+?)\$/g, (match, p1) => {
           try {
-            return katex.renderToString(p1, { displayMode: false, throwOnError: false });
+            return katex.renderToString(p1.trim(), { ...katexOpts, displayMode: false });
           } catch (e) {
             console.error('KaTeX error:', e);
             return match;
