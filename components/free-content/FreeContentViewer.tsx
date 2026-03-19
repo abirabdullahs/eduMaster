@@ -460,32 +460,61 @@ function FlashcardViewer({ data }: { data: any }) {
   const front = data.front ?? '';
   const back = data.back ?? '';
 
+  const faceBase: React.CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    backfaceVisibility: 'hidden',
+    WebkitBackfaceVisibility: 'hidden',
+    borderRadius: '16px',
+    padding: '24px 20px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    overflow: 'hidden',
+  };
+
   return (
     <div className="space-y-4">
       <div className="w-full max-w-md mx-auto" style={{ perspective: '1000px' }}>
         <div
-          className="relative w-full min-h-[12rem] cursor-pointer transition-transform duration-500"
           style={{
+            position: 'relative',
+            width: '100%',
+            height: '260px',          // explicit height — fixes black card bug
             transformStyle: 'preserve-3d',
             transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+            transition: 'transform 0.5s ease',
+            cursor: 'pointer',
           }}
           onClick={() => setFlipped(!flipped)}
         >
+          {/* Front face */}
           <div
-            className="absolute inset-0 bg-[#161b22] border border-slate-800 rounded-2xl p-6 flex items-center justify-center text-center"
-            style={{ backfaceVisibility: 'hidden' }}
+            style={{
+              ...faceBase,
+              background: '#0e1f14',
+              border: '0.5px solid #1a3a22',
+            }}
           >
             <div
               className="prose prose-invert prose-sm max-w-none [&>*]:text-white [&>p]:m-0"
               dangerouslySetInnerHTML={{ __html: front }}
             />
           </div>
+
+          {/* Back face */}
           <div
-            className="absolute inset-0 bg-indigo-600/20 border border-indigo-500/50 rounded-2xl p-6 flex items-center justify-center text-center"
-            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+            style={{
+              ...faceBase,
+              background: '#0b1520',
+              border: '0.5px solid #12213a',
+              transform: 'rotateY(180deg)',
+            }}
           >
             <div
-              className="prose prose-invert prose-sm max-w-none [&>*]:text-indigo-100 [&>p]:m-0"
+              className="prose prose-invert prose-sm max-w-none [&>*]:text-blue-100 [&>p]:m-0"
               dangerouslySetInnerHTML={{ __html: back }}
             />
           </div>
