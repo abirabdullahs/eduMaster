@@ -16,6 +16,80 @@ import ContentTypeSelector from '@/components/free-content/ContentTypeSelector';
 import FreeContentForms from '@/components/free-content/FreeContentForms';
 import type { FreeContentType } from '@/lib/types';
 
+function EditSubjectModal({
+  subject,
+  onClose,
+  onSave,
+}: {
+  subject: any;
+  onClose: () => void;
+  onSave: (name: string, description: string) => Promise<void>;
+}) {
+  const [name, setName] = useState(subject?.name || '');
+  const [description, setDescription] = useState(subject?.description || '');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setErr('Subject name is required');
+      return;
+    }
+    setSaving(true);
+    setErr('');
+    try {
+      await onSave(trimmed, description.trim());
+    } catch (e: any) {
+      setErr(e.message || 'Failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!subject) return null;
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#161b22] border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-xl">
+        <h3 className="text-lg font-bold text-white mb-4">Edit Subject</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 bg-[#0d1117] border border-slate-700 rounded-xl text-white"
+              placeholder="Subject name"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Description (optional)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-3 bg-[#0d1117] border border-slate-700 rounded-xl text-white resize-none"
+              placeholder="Description"
+              rows={3}
+            />
+          </div>
+          {err && <p className="text-sm text-red-400">{err}</p>}
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-slate-400 hover:text-white rounded-xl">
+              Cancel
+            </button>
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl disabled:opacity-50">
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function EditChapterTopicModal({
   title,
   initialName,
@@ -88,6 +162,7 @@ export default function AdminFreeSubjectPage() {
   const [contentForm, setContentForm] = useState<{ topicId: string; type: FreeContentType; content?: any } | null>(null);
   const [editingChapter, setEditingChapter] = useState<any | null>(null);
   const [editingTopic, setEditingTopic] = useState<{ topic: any; chapterId: string } | null>(null);
+  const [editingSubject, setEditingSubject] = useState(false);
   const [addingChapter, setAddingChapter] = useState(false);
   const [addingTopic, setAddingTopic] = useState<{ chapterId: string } | null>(null);
   const supabase = createClient();
@@ -154,6 +229,14 @@ export default function AdminFreeSubjectPage() {
     else alert('Failed: ' + error.message);
   };
 
+  const handleEditSubject = () => setEditingSubject(true);
+  const handleDeleteSubject = async () => {
+    if (!subject || !confirm(`Delete "${subject.name}" and all its chapters, topics, and contents?`)) return;
+    const { error } = await supabase.from('free_subjects').delete().eq('id', subject.id);
+    if (!error) router.push('/admin/free-content');
+    else alert('Failed: ' + error.message);
+  };
+
   const handleEditTopic = (topic: any, chapterId: string) => setEditingTopic({ topic, chapterId });
   const handleDeleteTopic = async (topic: any) => {
     if (!confirm(`Delete topic "${topic.name}" and all its contents?`)) return;
@@ -178,10 +261,24 @@ export default function AdminFreeSubjectPage() {
         <Link href="/admin/free-content" className="inline-flex items-center gap-2 text-slate-400 hover:text-white">
           <ArrowLeft size={18} /> Back to Free Content
         </Link>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white">{subject.name}</h1>
             <p className="text-slate-400 text-sm">{subject.description || 'No description'}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleEditSubject}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 font-bold rounded-xl transition-all"
+            >
+              <Edit3 size={16} /> Edit Subject
+            </button>
+            <button
+              onClick={handleDeleteSubject}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl transition-all"
+            >
+              <Trash2 size={16} /> Delete Subject
+            </button>
           </div>
         </div>
 
@@ -278,6 +375,24 @@ export default function AdminFreeSubjectPage() {
               .insert({ subject_id: subjectId, name, order_index: chapters.length });
             if (!error) {
               setAddingChapter(false);
+              fetchData();
+            } else throw new Error(error.message);
+          }}
+        />
+      )}
+
+      {/* Edit Subject Modal */}
+      {editingSubject && subject && (
+        <EditSubjectModal
+          subject={subject}
+          onClose={() => setEditingSubject(false)}
+          onSave={async (name: string, description: string) => {
+            const { error } = await supabase
+              .from('free_subjects')
+              .update({ name, description: description || null })
+              .eq('id', subject.id);
+            if (!error) {
+              setEditingSubject(false);
               fetchData();
             } else throw new Error(error.message);
           }}

@@ -14,8 +14,10 @@ import {
   CheckCircle2, 
   AlertCircle,
   ShieldCheck,
-  KeyRound
+  KeyRound,
+  Image as ImageIcon
 } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useForm } from 'react-hook-form';
@@ -26,6 +28,7 @@ const profileSchema = z.object({
   name: z.string().min(3, 'নাম অন্তত ৩ অক্ষরের হতে হবে'),
   mobile: z.string().min(11, 'সঠিক মোবাইল নাম্বার দিন'),
   class: z.enum(['SSC', 'HSC']).optional(),
+  avatar_url: z.union([z.string().url(), z.literal('')]).optional(),
 });
 
 const passwordSchema = z.object({
@@ -60,6 +63,7 @@ export default function StudentProfilePage() {
         name: profile.name || '',
         mobile: profile.mobile || '',
         class: profile.class ?? undefined,
+        avatar_url: profile.avatar_url || '',
       });
     }
   }, [profile, resetProfile]);
@@ -75,6 +79,7 @@ export default function StudentProfilePage() {
           name: data.name,
           mobile: data.mobile,
           class: data.class && ['SSC', 'HSC'].includes(data.class) ? data.class : null,
+          avatar_url: data.avatar_url?.trim() || null,
         })
         .eq('id', user.id);
 
@@ -179,6 +184,19 @@ export default function StudentProfilePage() {
                     </select>
                     {profileErrors.class && <p className="text-xs text-rose-500 font-bold">{profileErrors.class.message as string}</p>}
                   </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                      <ImageIcon size={14} /> Profile Photo URL
+                    </label>
+                    <input 
+                      {...registerProfile('avatar_url')}
+                      type="url"
+                      placeholder="https://example.com/your-photo.jpg"
+                      className="w-full bg-[#0d1117] border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all placeholder-slate-600"
+                    />
+                    {profileErrors.avatar_url && <p className="text-xs text-rose-500 font-bold">{profileErrors.avatar_url.message as string}</p>}
+                  </div>
                 </div>
 
                 <div className="pt-4 flex items-center justify-between">
@@ -277,8 +295,12 @@ export default function StudentProfilePage() {
           <div className="space-y-8">
             <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-8 shadow-xl space-y-6">
               <div className="text-center space-y-4">
-                <div className="w-24 h-24 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto text-indigo-500 border-4 border-slate-800">
-                  <User size={48} />
+                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto border-4 border-slate-800 bg-indigo-500/10 flex items-center justify-center">
+                  {profile?.avatar_url ? (
+                    <Image src={profile.avatar_url} alt={profile?.name || 'Avatar'} width={96} height={96} className="object-cover w-full h-full" />
+                  ) : (
+                    <User size={48} className="text-indigo-500" />
+                  )}
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-xl font-bold text-white tracking-tight">{profile?.name}</h3>
