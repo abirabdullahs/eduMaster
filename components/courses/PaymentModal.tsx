@@ -109,8 +109,8 @@ export default function PaymentModal({ course, onClose, onSuccess }: PaymentModa
                 <div className="space-y-3">
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Payment Instructions</p>
                   <div className="p-4 bg-slate-800/50 rounded-2xl space-y-2 text-sm text-slate-300">
-                    <p>১. নিচের যেকোনো নাম্বারে <span className="text-white font-bold">{formatPrice(course.discounted_price || course.main_price)}</span> টাকা Send Money করুন।</p>
-                    <p>২. bKash/Nagad: <span className="text-white font-bold">017XXXXXXXX</span></p>
+                    <p>১. নিচের নাম্বারে <span className="text-white font-bold">{formatPrice(course.discounted_price || course.main_price)}</span> টাকা Send Money করুন।</p>
+                    <p>২. bKash/Nagad: <span className="text-white font-bold">01406751374</span></p>
                     <p>৩. পেমেন্ট শেষে Transaction ID টি নিচে দিন।</p>
                   </div>
                 </div>

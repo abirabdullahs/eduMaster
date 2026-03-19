@@ -58,6 +58,17 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
   const enrollmentCount = course.enrollments?.[0]?.count || 0;
   const teacher = course.profiles;
 
+  // Sort curriculum by order_index (subjects, chapters, lectures)
+  const sortedSubjects = (course.subjects || []).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+    .map((s: any) => ({
+      ...s,
+      chapters: (s.chapters || []).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+        .map((c: any) => ({
+          ...c,
+          lectures: (c.lectures || []).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+        }))
+    }));
+
   return (
     <div className="min-h-screen bg-slate-50 font-hind-siliguri">
       {/* Hero Section */}
@@ -203,7 +214,7 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
             <section className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-8">
               <h2 className="text-3xl font-bold text-slate-900">What you&apos;ll learn</h2>
               <div className="grid md:grid-cols-2 gap-6">
-                {course.subjects?.map((subject: any) => (
+                {sortedSubjects.map((subject: any) => (
                   <div key={subject.id} className="flex items-start gap-3">
                     <CheckCircle2 className="text-emerald-500 shrink-0 mt-1" size={20} />
                     <span className="text-slate-700 font-medium">{subject.title}</span>
@@ -220,12 +231,12 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
                   Course Curriculum
                 </h2>
                 <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">
-                  {course.subjects?.length || 0} Subjects
+                  {sortedSubjects.length} Subjects
                 </p>
               </div>
 
               <div className="space-y-6">
-                {course.subjects?.map((subject: any) => (
+                {sortedSubjects.map((subject: any) => (
                   <div key={subject.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden group">
                     <div className="p-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
                       <h3 className="text-xl font-bold text-slate-900">{subject.title}</h3>
@@ -236,7 +247,7 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
                         <div key={chapter.id} className="space-y-4">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                              {chapter.order_index + 1}
+                              {(chapter.order_index ?? 0) + 1}
                             </div>
                             <h4 className="font-bold text-slate-800">{chapter.title}</h4>
                           </div>

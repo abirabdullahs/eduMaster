@@ -196,17 +196,14 @@ export default function CourseDetailPage() {
 
   const handleReorder = async (type: 'subject' | 'chapter' | 'lecture', items: any[]) => {
     const table = type === 'subject' ? 'subjects' : type === 'chapter' ? 'chapters' : 'lectures';
-    const updates = items.map((item, index) => ({
-      id: item.id,
-      order_index: index
-    }));
-
     try {
-      const { error } = await supabase.from(table).upsert(updates);
-      if (error) throw error;
+      for (let i = 0; i < items.length; i++) {
+        const { error } = await supabase.from(table).update({ order_index: i }).eq('id', items[i].id);
+        if (error) throw error;
+      }
       setRefreshKey(prev => prev + 1);
     } catch (err: any) {
-      alert('Failed to reorder: ' + err.message);
+      alert('Failed to reorder: ' + (err as Error).message);
     }
   };
 
@@ -241,9 +238,24 @@ export default function CourseDetailPage() {
         if (error) throw error;
       } else {
         const insertData = { ...payload };
-        if (type === 'subject') insertData.course_id = courseId;
-        if (type === 'chapter') insertData.subject_id = parentId;
-        if (type === 'lecture') insertData.chapter_id = parentId;
+        if (type === 'subject') {
+          insertData.course_id = courseId;
+          insertData.order_index = subjects.length;
+        }
+        if (type === 'chapter') {
+          insertData.subject_id = parentId;
+          const parentSubject = subjects.find((s: any) => s.id === parentId);
+          insertData.order_index = parentSubject?.chapters?.length ?? 0;
+        }
+        if (type === 'lecture') {
+          insertData.chapter_id = parentId;
+          let parentChapter: any = null;
+          for (const s of subjects) {
+            parentChapter = s.chapters?.find((c: any) => c.id === parentId);
+            if (parentChapter) break;
+          }
+          insertData.order_index = parentChapter?.lectures?.length ?? 0;
+        }
         
         const { error } = await supabase.from(table).insert(insertData);
         if (error) throw error;
