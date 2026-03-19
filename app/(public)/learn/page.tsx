@@ -26,7 +26,7 @@ export default function LearnPage() {
   }, [supabase]);
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4">
+    <div className="min-h-screen pt-24 pb-20 px-4 font-bengali">
       <div className="max-w-4xl mx-auto text-center space-y-12">
         <div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">বিনামূল্যে শিখুন</h1>

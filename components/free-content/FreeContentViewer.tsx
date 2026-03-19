@@ -143,7 +143,7 @@ export default function FreeContentViewer({
     case 'latex_formula':
       return (
         <div className="space-y-4">
-          <div className="p-6 bg-[#161b22] rounded-xl flex justify-center">
+          <div className="katex-on-dark p-6 bg-[#161b22] rounded-xl flex justify-center">
             <LatexRenderer content={data.formula || ''} className="text-2xl" />
           </div>
           {data.explanation && (

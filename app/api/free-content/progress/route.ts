@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
       });
 
       if (topicIds.length === 0) {
-        return NextResponse.json({ resume: null });
+        return NextResponse.json({ resume: null, subjectProgress: { completed: 0, total: 0 } });
       }
 
       const { data: contents } = await supabase
@@ -68,27 +68,33 @@ export async function GET(req: NextRequest) {
         .select('id, topic_id, order_index')
         .in('topic_id', topicIds);
 
+      const allContents = contents || [];
+      const totalCount = allContents.length;
+
       const { data: progress } = await supabase
         .from('free_content_progress')
         .select('content_id, status')
         .eq('user_id', user.id)
-        .in('content_id', (contents || []).map((c: { id: string }) => c.id));
+        .in('content_id', allContents.map((c: { id: string }) => c.id));
 
       const completedIds = new Set(
         (progress || []).filter((p: { status: string }) => p.status === 'completed').map((p: { content_id: string }) => p.content_id)
       );
+      const completedCount = completedIds.size;
 
-      const byTopic = (contents || []).reduce((acc: Record<string, { id: string; order_index: number }[]>, c: { id: string; topic_id: string; order_index: number }) => {
+      const byTopic = allContents.reduce((acc: Record<string, { id: string; order_index: number }[]>, c: { id: string; topic_id: string; order_index: number }) => {
         if (!acc[c.topic_id]) acc[c.topic_id] = [];
         acc[c.topic_id].push({ id: c.id, order_index: c.order_index });
         return acc;
       }, {});
 
+      const subjectProgress = { completed: completedCount, total: totalCount };
+
       for (const tid of topicIds) {
         const list = (byTopic[tid] || []).sort((a, b) => a.order_index - b.order_index);
         for (let i = 0; i < list.length; i++) {
           if (!completedIds.has(list[i].id)) {
-            return NextResponse.json({ resume: { topic_id: tid, content_index: i } });
+            return NextResponse.json({ resume: { topic_id: tid, content_index: i }, subjectProgress });
           }
         }
       }
@@ -99,6 +105,7 @@ export async function GET(req: NextRequest) {
           topic_id: lastTid || topicIds[0],
           content_index: Math.max(0, lastList.length - 1),
         },
+        subjectProgress,
       });
     }
 

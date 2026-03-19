@@ -33,7 +33,7 @@ export default function LearnClassPage() {
   }, [classParam, supabase]);
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4">
+    <div className="min-h-screen pt-24 pb-20 px-4 font-bengali">
       <div className="max-w-4xl mx-auto">
         <Link href="/learn" className="text-slate-400 hover:text-white text-sm mb-6 inline-block">
           ← Back to Learn

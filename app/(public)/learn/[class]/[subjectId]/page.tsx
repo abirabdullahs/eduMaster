@@ -19,8 +19,9 @@ export default function LearnSubjectPage() {
   const [contentIndex, setContentIndex] = useState(0);
   const resumeIndexRef = useRef<number | null>(null);
   const [progress, setProgress] = useState<Record<string, { status: string; answer_given?: string; is_correct?: boolean }>>({});
+  const [subjectProgress, setSubjectProgress] = useState({ completed: 0, total: 0 });
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // false on mobile so menu hidden initially
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const supabase = createClient();
 
@@ -66,6 +67,9 @@ export default function LearnSubjectPage() {
       if (user) {
         const res = await fetch(`/api/free-content/progress?subject_id=${subjectId}`);
         const data = await res.json();
+        if (data.subjectProgress) {
+          setSubjectProgress(data.subjectProgress);
+        }
         if (data.resume?.topic_id && data.resume?.content_index != null) {
           const t = allTopics.find((x: any) => x.id === data.resume.topic_id);
           if (t) {
@@ -73,6 +77,12 @@ export default function LearnSubjectPage() {
             initialIndex = data.resume.content_index;
           }
         }
+      } else {
+        const allTopicIds = allTopics.map((x: any) => x.id);
+        const { count: totalContentCount } = allTopicIds.length > 0
+          ? await supabase.from('free_contents').select('*', { count: 'exact', head: true }).in('topic_id', allTopicIds)
+          : { count: 0 };
+        setSubjectProgress({ completed: 0, total: totalContentCount ?? 0 });
       }
 
       setSelectedTopic(initialTopic);
@@ -118,6 +128,7 @@ export default function LearnSubjectPage() {
 
   const handleMarkComplete = async () => {
     if (!user || !currentContent) return;
+    const wasCompleted = progress[currentContent.id]?.status === 'completed';
     await fetch('/api/free-content/progress', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -128,11 +139,13 @@ export default function LearnSubjectPage() {
       }),
     });
     setProgress(p => ({ ...p, [currentContent.id]: { status: 'completed' } }));
+    if (!wasCompleted) setSubjectProgress(prev => ({ ...prev, completed: prev.completed + 1 }));
     if (contentIndex < contents.length - 1) setContentIndex(i => i + 1);
   };
 
   const handleAnswerSubmit = async (answer: string, isCorrect?: boolean) => {
     if (!user || !currentContent) return;
+    const wasCompleted = progress[currentContent.id]?.status === 'completed';
     await fetch('/api/free-content/progress', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -147,6 +160,7 @@ export default function LearnSubjectPage() {
       ...p,
       [currentContent.id]: { status: 'completed', answer_given: answer, is_correct: isCorrect },
     }));
+    if (!wasCompleted) setSubjectProgress(prev => ({ ...prev, completed: prev.completed + 1 }));
     if (contentIndex < contents.length - 1) setContentIndex(i => i + 1);
   };
 
@@ -161,7 +175,7 @@ export default function LearnSubjectPage() {
   const currentChapter = chapters.find(c => c.topics?.some((t: any) => t.id === selectedTopic?.id));
 
   return (
-    <div className="min-h-screen pt-20 pb-12">
+    <div className="min-h-screen pt-20 pb-12 font-bengali">
       <div className="flex h-[calc(100vh-80px)]">
         {/* Sidebar */}
         <div className={cn(
@@ -218,11 +232,11 @@ export default function LearnSubjectPage() {
         {/* Main */}
         <div className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 md:p-10">
           <div className="max-w-3xl mx-auto">
-            <nav className="text-sm text-slate-500 mb-6">
+            <nav className="text-sm text-slate-500 mb-6 flex items-center gap-2 flex-wrap">
               <Link href="/learn" className="hover:text-white">Learn</Link>
-              <span className="mx-2">/</span>
-              <Link href={`/learn/${classParam}`} className="hover:text-white">{classParam}</Link>
-              <span className="mx-2">/</span>
+              <span className="mx-1">/</span>
+              <Link href={`/learn/${classParam}`} className="hover:text-white">{classParam} Subjects</Link>
+              <span className="mx-1">/</span>
               <span className="text-white">{subject?.name}</span>
               {currentChapter && (
                 <>
@@ -269,7 +283,7 @@ export default function LearnSubjectPage() {
                 <div className="mt-10 pt-6 border-t border-slate-800 space-y-4">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-500">
-                      {contents.filter((c: any) => progress[c.id]?.status === 'completed').length} / {contents.length} completed
+                      {subjectProgress.completed} / {subjectProgress.total} completed
                     </span>
                     <button
                       type="button"
@@ -283,7 +297,7 @@ export default function LearnSubjectPage() {
                     <div
                       className="h-full bg-indigo-500 transition-all duration-300"
                       style={{
-                        width: `${(contents.filter((c: any) => progress[c.id]?.status === 'completed').length / contents.length) * 100}%`,
+                        width: `${subjectProgress.total > 0 ? (subjectProgress.completed / subjectProgress.total) * 100 : 0}%`,
                       }}
                     />
                   </div>
@@ -299,6 +313,7 @@ export default function LearnSubjectPage() {
                     <button
                       onClick={async () => {
                         if (user && currentContent) {
+                          const wasCompleted = progress[currentContent.id]?.status === 'completed';
                           await fetch('/api/free-content/progress', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -310,6 +325,7 @@ export default function LearnSubjectPage() {
                             }),
                           });
                           setProgress(p => ({ ...p, [currentContent.id]: { ...p[currentContent.id], status: 'completed' } }));
+                          if (!wasCompleted) setSubjectProgress(prev => ({ ...prev, completed: prev.completed + 1 }));
                         }
                         setContentIndex(i => Math.min(contents.length - 1, i + 1));
                       }}
