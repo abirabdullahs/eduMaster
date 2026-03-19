@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import SafeMarkdown from '@/components/shared/SafeMarkdown';
-import { cn } from '@/lib/utils';
-import LatexRenderer from '@/components/shared/LatexRenderer';
-import { CheckCircle2, XCircle, Copy } from 'lucide-react';
-import type { FreeContentType } from '@/lib/types';
+import { useState } from "react";
+import SafeMarkdown from "@/components/shared/SafeMarkdown";
+import { cn } from "@/lib/utils";
+import LatexRenderer from "@/components/shared/LatexRenderer";
+import { CheckCircle2, XCircle, Copy } from "lucide-react";
+import type { FreeContentType } from "@/lib/types";
 
 interface FreeContentViewerProps {
   content: any;
@@ -27,15 +27,15 @@ export default function FreeContentViewer({
   const type = content.content_type as FreeContentType;
 
   switch (type) {
-    case 'markdown':
+    case "markdown":
       return (
         <div className="prose prose-invert prose-indigo max-w-none">
-          <SafeMarkdown>{String(data.body ?? '')}</SafeMarkdown>
+          <SafeMarkdown>{String(data.body ?? "")}</SafeMarkdown>
         </div>
       );
 
-    case 'video': {
-      const url = data.url || '';
+    case "video": {
+      const url = data.url || "";
       const videoId = url.match(/(?:v=|\/)([\w-]{11})(?:\?|&|$)/)?.[1];
       return (
         <div className="space-y-4">
@@ -53,12 +53,16 @@ export default function FreeContentViewer({
       );
     }
 
-    case 'key_points':
+    case "key_points":
       return (
         <div className="space-y-4">
           <ul className="space-y-3">
             {(data.points || []).map((p: string, i: number) => (
-              <li key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-2" style={{ animationDelay: `${i * 80}ms` }}>
+              <li
+                key={i}
+                className="flex gap-3 animate-in fade-in slide-in-from-left-2"
+                style={{ animationDelay: `${i * 80}ms` }}
+              >
                 <span className="text-indigo-400 font-bold">•</span>
                 <span className="text-slate-300">{p}</span>
               </li>
@@ -67,7 +71,7 @@ export default function FreeContentViewer({
         </div>
       );
 
-    case 'mcq':
+    case "mcq":
       return (
         <McqViewer
           data={data}
@@ -78,7 +82,7 @@ export default function FreeContentViewer({
         />
       );
 
-    case 'short_answer':
+    case "short_answer":
       return (
         <ShortAnswerViewer
           data={data}
@@ -89,7 +93,7 @@ export default function FreeContentViewer({
         />
       );
 
-    case 'true_false':
+    case "true_false":
       return (
         <TrueFalseViewer
           data={data}
@@ -100,7 +104,7 @@ export default function FreeContentViewer({
         />
       );
 
-    case 'fill_blank':
+    case "fill_blank":
       return (
         <FillBlankViewer
           data={data}
@@ -111,10 +115,10 @@ export default function FreeContentViewer({
         />
       );
 
-    case 'flashcard':
+    case "flashcard":
       return <FlashcardViewer data={data} />;
 
-    case 'match_following':
+    case "match_following":
       return (
         <MatchFollowingViewer
           data={data}
@@ -125,39 +129,43 @@ export default function FreeContentViewer({
         />
       );
 
-    case 'image_diagram':
+    case "image_diagram":
       return (
         <div className="space-y-4">
           {data.image_url && (
-            <img src={data.image_url} alt={data.caption} className="w-full rounded-xl" />
+            <img
+              src={data.image_url}
+              alt={data.caption}
+              className="w-full rounded-xl"
+            />
           )}
           {data.caption && <p className="text-slate-400">{data.caption}</p>}
           {data.description && (
             <div className="prose prose-invert prose-sm">
-              <SafeMarkdown>{String(data.description ?? '')}</SafeMarkdown>
+              <SafeMarkdown>{String(data.description ?? "")}</SafeMarkdown>
             </div>
           )}
         </div>
       );
 
-    case 'latex_formula':
+    case "latex_formula":
       return (
         <div className="space-y-4">
           <div className="katex-on-dark p-6 bg-[#161b22] rounded-xl flex justify-center">
-            <LatexRenderer content={data.formula || ''} className="text-2xl" />
+            <LatexRenderer content={data.formula || ""} className="text-2xl" />
           </div>
           {data.explanation && (
             <div className="prose prose-invert prose-sm">
-              <SafeMarkdown>{String(data.explanation ?? '')}</SafeMarkdown>
+              <SafeMarkdown>{String(data.explanation ?? "")}</SafeMarkdown>
             </div>
           )}
         </div>
       );
 
-    case 'code_snippet':
+    case "code_snippet":
       return <CodeSnippetViewer data={data} />;
 
-    case 'mnemonic':
+    case "mnemonic":
       return <MnemonicViewer data={data} />;
 
     default:
@@ -182,7 +190,9 @@ function McqViewer({
   previousAnswer?: string;
   isCorrect?: boolean;
 }) {
-  const [selected, setSelected] = useState<string | null>(previousAnswer ?? null);
+  const [selected, setSelected] = useState<string | null>(
+    previousAnswer ?? null,
+  );
   const [submitted, setSubmitted] = useState(!!isCompleted);
   const correctId = data.correct_option;
 
@@ -209,23 +219,37 @@ function McqViewer({
               onClick={() => !submitted && setSelected(optId)}
               disabled={submitted}
               className={cn(
-                'p-4 rounded-xl text-left border transition-all',
-                showCorrect && 'bg-emerald-500/20 border-emerald-500 text-emerald-200',
-                showWrong && 'bg-red-500/20 border-red-500 text-red-200',
-                !showCorrect && !showWrong && isSelected && 'bg-indigo-600 border-indigo-500 text-white',
-                !showCorrect && !showWrong && !isSelected && 'bg-white/5 border-slate-800 text-slate-300 hover:border-slate-600'
+                "p-4 rounded-xl text-left border transition-all",
+                showCorrect &&
+                  "bg-emerald-500/20 border-emerald-500 text-emerald-200",
+                showWrong && "bg-red-500/20 border-red-500 text-red-200",
+                !showCorrect &&
+                  !showWrong &&
+                  isSelected &&
+                  "bg-indigo-600 border-indigo-500 text-white",
+                !showCorrect &&
+                  !showWrong &&
+                  !isSelected &&
+                  "bg-white/5 border-slate-800 text-slate-300 hover:border-slate-600",
               )}
             >
-              <span className="font-bold mr-2">{String(optId).toUpperCase()}.</span>
+              <span className="font-bold mr-2">
+                {String(optId).toUpperCase()}.
+              </span>
               {opt.text}
-              {showCorrect && <CheckCircle2 className="inline ml-2" size={18} />}
+              {showCorrect && (
+                <CheckCircle2 className="inline ml-2" size={18} />
+              )}
               {showWrong && <XCircle className="inline ml-2" size={18} />}
             </button>
           );
         })}
       </div>
       {!submitted && selected && onSubmitAnswer && (
-        <button onClick={handleSubmit} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl">
+        <button
+          onClick={handleSubmit}
+          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"
+        >
           Submit
         </button>
       )}
@@ -252,9 +276,9 @@ function ShortAnswerViewer({
   previousAnswer?: string;
   isCorrect?: boolean;
 }) {
-  const [answer, setAnswer] = useState(previousAnswer ?? '');
+  const [answer, setAnswer] = useState(previousAnswer ?? "");
   const [submitted, setSubmitted] = useState(!!isCompleted);
-  const correctAnswer = String(data.correct_answer ?? '').trim();
+  const correctAnswer = String(data.correct_answer ?? "").trim();
   const caseSensitive = data.case_sensitive === true;
 
   const handleSubmit = () => {
@@ -269,7 +293,9 @@ function ShortAnswerViewer({
 
   return (
     <div className="space-y-4">
-      <p className="text-white font-medium">{data.question}</p>
+      <div className="text-white font-medium prose prose-invert prose-sm max-w-none">
+        <SafeMarkdown>{String(data.question ?? "")}</SafeMarkdown>
+      </div>
       {!submitted ? (
         <>
           <input
@@ -305,7 +331,8 @@ function ShortAnswerViewer({
             Your answer: <span className="text-white">{previousAnswer}</span>
           </p>
           <p className="text-slate-400">
-            Correct answer: <span className="text-emerald-400">{correctAnswer}</span>
+            Correct answer:{" "}
+            <span className="text-emerald-400">{correctAnswer}</span>
           </p>
         </div>
       )}
@@ -332,9 +359,9 @@ function TrueFalseViewer({
   isCorrect?: boolean;
 }) {
   const [submitted, setSubmitted] = useState(!!isCompleted);
-  const correctAnswer = data.correct_answer === true ? 'true' : 'false';
+  const correctAnswer = data.correct_answer === true ? "true" : "false";
 
-  const handleChoice = (val: 'true' | 'false') => {
+  const handleChoice = (val: "true" | "false") => {
     if (submitted || !onSubmitAnswer) return;
     const correct = val === correctAnswer;
     onSubmitAnswer(val, correct);
@@ -346,27 +373,47 @@ function TrueFalseViewer({
       <p className="text-white font-medium text-lg">{data.statement}</p>
       <div className="grid grid-cols-2 gap-4">
         <button
-          onClick={() => handleChoice('true')}
+          onClick={() => handleChoice("true")}
           disabled={submitted}
           className={cn(
-            'py-8 px-6 rounded-2xl border-2 font-bold text-xl transition-all',
-            submitted && previousAnswer === 'true' && isCorrect && 'bg-emerald-500/20 border-emerald-500 text-emerald-400',
-            submitted && previousAnswer === 'true' && !isCorrect && 'bg-red-500/20 border-red-500 text-red-400',
-            submitted && correctAnswer === 'true' && previousAnswer !== 'true' && 'bg-emerald-500/10 border-emerald-500/50',
-            !submitted && 'bg-[#161b22] border-slate-800 text-slate-300 hover:border-indigo-500 hover:bg-indigo-500/10'
+            "py-8 px-6 rounded-2xl border-2 font-bold text-xl transition-all",
+            submitted &&
+              previousAnswer === "true" &&
+              isCorrect &&
+              "bg-emerald-500/20 border-emerald-500 text-emerald-400",
+            submitted &&
+              previousAnswer === "true" &&
+              !isCorrect &&
+              "bg-red-500/20 border-red-500 text-red-400",
+            submitted &&
+              correctAnswer === "true" &&
+              previousAnswer !== "true" &&
+              "bg-emerald-500/10 border-emerald-500/50",
+            !submitted &&
+              "bg-[#161b22] border-slate-800 text-slate-300 hover:border-indigo-500 hover:bg-indigo-500/10",
           )}
         >
           TRUE
         </button>
         <button
-          onClick={() => handleChoice('false')}
+          onClick={() => handleChoice("false")}
           disabled={submitted}
           className={cn(
-            'py-8 px-6 rounded-2xl border-2 font-bold text-xl transition-all',
-            submitted && previousAnswer === 'false' && isCorrect && 'bg-emerald-500/20 border-emerald-500 text-emerald-400',
-            submitted && previousAnswer === 'false' && !isCorrect && 'bg-red-500/20 border-red-500 text-red-400',
-            submitted && correctAnswer === 'false' && previousAnswer !== 'false' && 'bg-emerald-500/10 border-emerald-500/50',
-            !submitted && 'bg-[#161b22] border-slate-800 text-slate-300 hover:border-indigo-500 hover:bg-indigo-500/10'
+            "py-8 px-6 rounded-2xl border-2 font-bold text-xl transition-all",
+            submitted &&
+              previousAnswer === "false" &&
+              isCorrect &&
+              "bg-emerald-500/20 border-emerald-500 text-emerald-400",
+            submitted &&
+              previousAnswer === "false" &&
+              !isCorrect &&
+              "bg-red-500/20 border-red-500 text-red-400",
+            submitted &&
+              correctAnswer === "false" &&
+              previousAnswer !== "false" &&
+              "bg-emerald-500/10 border-emerald-500/50",
+            !submitted &&
+              "bg-[#161b22] border-slate-800 text-slate-300 hover:border-indigo-500 hover:bg-indigo-500/10",
           )}
         >
           FALSE
@@ -394,10 +441,10 @@ function FillBlankViewer({
   previousAnswer?: string;
   isCorrect?: boolean;
 }) {
-  const [fillValue, setFillValue] = useState(previousAnswer ?? '');
+  const [fillValue, setFillValue] = useState(previousAnswer ?? "");
   const [submitted, setSubmitted] = useState(!!isCompleted);
-  const correctAnswer = String(data.correct_answer ?? '').trim();
-  const parts = String(data.sentence ?? '').split('___blank___');
+  const correctAnswer = String(data.correct_answer ?? "").trim();
+  const parts = String(data.sentence ?? "").split("___blank___");
 
   const handleSubmit = () => {
     const trimmed = fillValue.trim();
@@ -413,12 +460,16 @@ function FillBlankViewer({
         {parts.map((p: string, i: number) => (
           <span key={i}>
             {p}
-            {i < parts.length - 1 && (
-              submitted ? (
-                <span className={cn(
-                  'inline-block mx-1 px-2 py-0.5 rounded',
-                  isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                )}>
+            {i < parts.length - 1 &&
+              (submitted ? (
+                <span
+                  className={cn(
+                    "inline-block mx-1 px-2 py-0.5 rounded",
+                    isCorrect
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "bg-red-500/20 text-red-400",
+                  )}
+                >
                   {previousAnswer}
                 </span>
               ) : (
@@ -429,8 +480,7 @@ function FillBlankViewer({
                   placeholder="..."
                   className="inline-block w-32 mx-1 px-2 py-1 bg-[#0d1117] border border-slate-700 rounded text-white"
                 />
-              )
-            )}
+              ))}
           </span>
         ))}
       </div>
@@ -448,7 +498,8 @@ function FillBlankViewer({
       )}
       {submitted && !isCorrect && (
         <p className="text-slate-400">
-          Correct answer: <span className="text-emerald-400">{correctAnswer}</span>
+          Correct answer:{" "}
+          <span className="text-emerald-400">{correctAnswer}</span>
         </p>
       )}
     </div>
@@ -457,36 +508,39 @@ function FillBlankViewer({
 
 function FlashcardViewer({ data }: { data: any }) {
   const [flipped, setFlipped] = useState(false);
-  const front = data.front ?? '';
-  const back = data.back ?? '';
+  const front = data.front ?? "";
+  const back = data.back ?? "";
 
   const faceBase: React.CSSProperties = {
-    position: 'absolute',
+    position: "absolute",
     inset: 0,
-    backfaceVisibility: 'hidden',
-    WebkitBackfaceVisibility: 'hidden',
-    borderRadius: '16px',
-    padding: '24px 20px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    overflow: 'hidden',
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+    borderRadius: "16px",
+    padding: "24px 20px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    overflow: "hidden",
   };
 
   return (
     <div className="space-y-4">
-      <div className="w-full max-w-md mx-auto" style={{ perspective: '1000px' }}>
+      <div
+        className="w-full max-w-md mx-auto"
+        style={{ perspective: "1000px" }}
+      >
         <div
           style={{
-            position: 'relative',
-            width: '100%',
-            height: '260px',          // explicit height — fixes black card bug
-            transformStyle: 'preserve-3d',
-            transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-            transition: 'transform 0.5s ease',
-            cursor: 'pointer',
+            position: "relative",
+            width: "100%",
+            height: "260px", // explicit height — fixes black card bug
+            transformStyle: "preserve-3d",
+            transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+            transition: "transform 0.5s ease",
+            cursor: "pointer",
           }}
           onClick={() => setFlipped(!flipped)}
         >
@@ -494,8 +548,8 @@ function FlashcardViewer({ data }: { data: any }) {
           <div
             style={{
               ...faceBase,
-              background: '#0e1f14',
-              border: '0.5px solid #1a3a22',
+              background: "#0e1f14",
+              border: "0.5px solid #1a3a22",
             }}
           >
             <div
@@ -508,9 +562,9 @@ function FlashcardViewer({ data }: { data: any }) {
           <div
             style={{
               ...faceBase,
-              background: '#0b1520',
-              border: '0.5px solid #12213a',
-              transform: 'rotateY(180deg)',
+              background: "#0b1520",
+              border: "0.5px solid #12213a",
+              transform: "rotateY(180deg)",
             }}
           >
             <div
@@ -542,13 +596,13 @@ function MatchFollowingViewer({
   const right = data.right || [];
   const correctPairs = data.correct_pairs || {};
   const [selections, setSelections] = useState<Record<number, number>>(
-    previousAnswer ? JSON.parse(previousAnswer) : {}
+    previousAnswer ? JSON.parse(previousAnswer) : {},
   );
   const [submitted, setSubmitted] = useState(!!isCompleted);
 
   const handleSelect = (leftIdx: number, rightIdx: number) => {
     if (submitted) return;
-    setSelections(prev => ({ ...prev, [leftIdx]: rightIdx }));
+    setSelections((prev) => ({ ...prev, [leftIdx]: rightIdx }));
   };
 
   const handleSubmit = () => {
@@ -556,22 +610,29 @@ function MatchFollowingViewer({
     let correct = true;
     left.forEach((leftItem: string, li: number) => {
       const sel = selections[li];
-      if (sel === undefined || correctPairs[leftItem] !== right[sel]) correct = false;
+      if (sel === undefined || correctPairs[leftItem] !== right[sel])
+        correct = false;
     });
     if (Object.keys(selections).length !== left.length) correct = false;
     onSubmitAnswer(JSON.stringify(selections), correct);
     setSubmitted(true);
   };
 
-  const isPairCorrect = (li: number, ri: number) => correctPairs[left[li]] === right[ri];
+  const isPairCorrect = (li: number, ri: number) =>
+    correctPairs[left[li]] === right[ri];
 
   return (
     <div className="space-y-4">
       {data.title && <p className="text-white font-medium">{data.title}</p>}
-      <p className="text-slate-500 text-sm">Match each left item with the correct right item.</p>
+      <p className="text-slate-500 text-sm">
+        Match each left item with the correct right item.
+      </p>
       <div className="space-y-4">
         {left.map((leftItem: string, li: number) => (
-          <div key={li} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <div
+            key={li}
+            className="flex flex-col sm:flex-row gap-2 items-start sm:items-center"
+          >
             <div className="flex-1 p-3 rounded-xl bg-[#161b22] border border-slate-800 text-white shrink-0 min-w-[120px]">
               {leftItem}
             </div>
@@ -579,21 +640,41 @@ function MatchFollowingViewer({
             <div className="flex-1 flex flex-wrap gap-2">
               {right.map((rightItem: string, ri: number) => {
                 const isSelected = selections[li] === ri;
-                const usedByOther = Object.entries(selections).some(([k, v]) => Number(k) !== li && v === ri);
+                const usedByOther = Object.entries(selections).some(
+                  ([k, v]) => Number(k) !== li && v === ri,
+                );
                 return (
                   <button
                     key={ri}
                     type="button"
-                    onClick={() => !submitted && !usedByOther && handleSelect(li, ri)}
+                    onClick={() =>
+                      !submitted && !usedByOther && handleSelect(li, ri)
+                    }
                     disabled={submitted || usedByOther}
                     className={cn(
-                      'px-4 py-2 rounded-xl border text-sm transition-all',
-                      submitted && isSelected && isPairCorrect(li, ri) && 'bg-emerald-500/20 border-emerald-500 text-emerald-400',
-                      submitted && isSelected && !isPairCorrect(li, ri) && 'bg-red-500/20 border-red-500 text-red-400',
-                      submitted && !isSelected && correctPairs[leftItem] === rightItem && 'bg-emerald-500/10 border-emerald-500/50',
-                      !submitted && isSelected && 'bg-indigo-600/20 border-indigo-500 text-white',
-                      !submitted && !isSelected && !usedByOther && 'bg-[#161b22] border-slate-800 text-slate-400 hover:border-slate-600',
-                      usedByOther && !isSelected && 'opacity-40 cursor-not-allowed'
+                      "px-4 py-2 rounded-xl border text-sm transition-all",
+                      submitted &&
+                        isSelected &&
+                        isPairCorrect(li, ri) &&
+                        "bg-emerald-500/20 border-emerald-500 text-emerald-400",
+                      submitted &&
+                        isSelected &&
+                        !isPairCorrect(li, ri) &&
+                        "bg-red-500/20 border-red-500 text-red-400",
+                      submitted &&
+                        !isSelected &&
+                        correctPairs[leftItem] === rightItem &&
+                        "bg-emerald-500/10 border-emerald-500/50",
+                      !submitted &&
+                        isSelected &&
+                        "bg-indigo-600/20 border-indigo-500 text-white",
+                      !submitted &&
+                        !isSelected &&
+                        !usedByOther &&
+                        "bg-[#161b22] border-slate-800 text-slate-400 hover:border-slate-600",
+                      usedByOther &&
+                        !isSelected &&
+                        "opacity-40 cursor-not-allowed",
                     )}
                   >
                     {rightItem}
@@ -604,19 +685,24 @@ function MatchFollowingViewer({
           </div>
         ))}
       </div>
-      {!submitted && onSubmitAnswer && Object.keys(selections).length === left.length && (
-        <button onClick={handleSubmit} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl">
-          Submit
-        </button>
-      )}
+      {!submitted &&
+        onSubmitAnswer &&
+        Object.keys(selections).length === left.length && (
+          <button
+            onClick={handleSubmit}
+            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl"
+          >
+            Submit
+          </button>
+        )}
     </div>
   );
 }
 
 function CodeSnippetViewer({ data }: { data: any }) {
   const [copied, setCopied] = useState(false);
-  const code = String(data.code ?? '');
-  const lang = String(data.language ?? 'plaintext');
+  const code = String(data.code ?? "");
+  const lang = String(data.language ?? "plaintext");
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -635,7 +721,7 @@ function CodeSnippetViewer({ data }: { data: any }) {
           className="absolute top-2 right-2 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 flex items-center gap-1"
         >
           <Copy size={16} />
-          <span className="text-xs">{copied ? 'Copied!' : 'Copy'}</span>
+          <span className="text-xs">{copied ? "Copied!" : "Copy"}</span>
         </button>
       </div>
       {data.explanation && (
@@ -651,7 +737,9 @@ function MnemonicViewer({ data }: { data: any }) {
   return (
     <div className="space-y-4">
       <div className="p-8 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-2xl text-center">
-        <p className="text-slate-500 text-sm uppercase tracking-wider mb-2">{data.topic}</p>
+        <p className="text-slate-500 text-sm uppercase tracking-wider mb-2">
+          {data.topic}
+        </p>
         <p className="text-2xl font-bold text-white">{data.mnemonic}</p>
       </div>
       {data.breakdown && (
