@@ -56,13 +56,13 @@ export async function POST(req: Request) {
     if (updateErr) throw updateErr
 
     const courseTitle = (enrollment as any)?.courses?.title || 'Course'
-    await supabase.from('admin_activity_log').insert({
+    const { error: _logErr } = await supabase.from('admin_activity_log').insert({
       activity_type: status === 'active' ? 'enrollment_approved' : 'enrollment_rejected',
       title: status === 'active' ? `Approved enrollment → ${courseTitle}` : `Rejected enrollment → ${courseTitle}`,
       entity_type: 'enrollment',
       entity_id: enrollment_id,
       href: '/admin/enrollments',
-    }).catch(() => {})
+    })
 
     // When approving offline enrollment, create first monthly payment
     if (status === 'active' && enrollment.courses?.is_offline) {
