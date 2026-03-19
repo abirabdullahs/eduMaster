@@ -155,22 +155,10 @@ export default function FreeContentViewer({
       );
 
     case 'code_snippet':
-      return (
-        <CodeSnippetViewer
-          data={data}
-          onMarkComplete={onMarkComplete}
-          isCompleted={isCompleted}
-        />
-      );
+      return <CodeSnippetViewer data={data} />;
 
     case 'mnemonic':
-      return (
-        <MnemonicViewer
-          data={data}
-          onMarkComplete={onMarkComplete}
-          isCompleted={isCompleted}
-        />
-      );
+      return <MnemonicViewer data={data} />;
 
     default:
       return (
