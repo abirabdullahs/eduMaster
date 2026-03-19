@@ -16,6 +16,7 @@ interface EnrollButtonProps {
 export default function EnrollButton({ course, className }: EnrollButtonProps) {
   const [loading, setLoading] = useState(true);
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const supabase = createClient();
   const router = useRouter();
@@ -23,9 +24,12 @@ export default function EnrollButton({ course, className }: EnrollButtonProps) {
   const checkEnrollment = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
+      setIsLoggedIn(false);
+      setEnrollment(null);
       setLoading(false);
       return;
     }
+    setIsLoggedIn(true);
 
     const { data } = await supabase
       .from('enrollments')
@@ -89,6 +93,21 @@ export default function EnrollButton({ course, className }: EnrollButtonProps) {
         <Clock size={16} />
         Pending Approval
       </div>
+    );
+  }
+
+  // Not logged in - must login first to enroll
+  if (!isLoggedIn) {
+    return (
+      <button
+        onClick={() => router.push(`/login?next=/courses/${course.id}`)}
+        className={cn(
+          "px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20",
+          className
+        )}
+      >
+        Login to Enroll
+      </button>
     );
   }
 

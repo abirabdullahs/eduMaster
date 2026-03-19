@@ -89,7 +89,7 @@ export default function AdminOverview() {
           newTeachersThisWeek: newTeachersThisWeek || 0,
           newCoursesThisWeek: newCoursesThisWeek || 0,
         });
-        setRecentActivity((recentEnrollments || []) as RecentEnrollment[]);
+        setRecentActivity((recentEnrollments || []) as unknown as RecentEnrollment[]);
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {
