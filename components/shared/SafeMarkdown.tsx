@@ -5,8 +5,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
-
 import type { PluggableList } from 'unified';
 
 interface SafeMarkdownProps {
@@ -15,7 +13,6 @@ interface SafeMarkdownProps {
   components?: Record<string, React.ComponentType<any>>;
 }
 
-/** Catches rehype-katex "children in undefined" and falls back to plain markdown */
 class MarkdownErrorBoundary extends Component<
   { children: ReactNode; fallback: (content: string) => ReactNode; content: string },
   { hasError: boolean }
@@ -26,14 +23,8 @@ class MarkdownErrorBoundary extends Component<
     return { hasError: true };
   }
 
-  componentDidCatch() {
-    // Error logged for debugging
-  }
-
   render() {
-    if (this.state.hasError) {
-      return this.props.fallback(this.props.content);
-    }
+    if (this.state.hasError) return this.props.fallback(this.props.content);
     return this.props.children;
   }
 }
@@ -44,26 +35,34 @@ export default function SafeMarkdown({
   components,
 }: SafeMarkdownProps) {
   const content = String(children ?? '');
-  const hasMath = /\$\$|\$|\\\[|\\\]|\\frac|```math/.test(content);
-  const remarkPlugins: PluggableList = [remarkGfm, ...(hasMath ? [remarkMath] : [])];
-  const rehypePlugins: PluggableList = hasMath ? [rehypeKatex()] : [];
+  const hasMath = /\$\$?|\\\[|\\\]|\\frac|```math/.test(content);
+
+  const remarkPlugins: PluggableList = hasMath ? [remarkGfm, remarkMath] : [remarkGfm];
+  const rehypePlugins: PluggableList = hasMath ? [rehypeKatex] : [];
+
   const fallback = (text: string) => (
     <div
       className={className}
       dangerouslySetInnerHTML={{
-        __html: text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>'),
+        __html: text
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\n/g, '<br/>'),
       }}
     />
   );
+
   return (
     <MarkdownErrorBoundary key={content} content={content} fallback={fallback}>
-      <ReactMarkdown
-        remarkPlugins={remarkPlugins}
-        rehypePlugins={rehypePlugins}
-        components={components}
-      >
-        {content}
-      </ReactMarkdown>
+      <div className={className}>
+        <ReactMarkdown
+          remarkPlugins={remarkPlugins}
+          rehypePlugins={rehypePlugins}
+          components={components}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
     </MarkdownErrorBoundary>
   );
 }
