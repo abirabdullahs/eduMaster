@@ -1,5 +1,6 @@
 import HeroSection from '@/components/home/HeroSection';
 import StatsSection from '@/components/home/StatsSection';
+import FreeLearningSection from '@/components/home/FreeLearningSection';
 import FeaturedCourses from '@/components/home/FeaturedCourses';
 import UpcomingExams from '@/components/home/UpcomingExams';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
@@ -12,6 +13,7 @@ export default function HomePage() {
     <div className="bg-[#0a0f1e] overflow-hidden">
       <HeroSection />
       <StatsSection />
+      <FreeLearningSection />
       <FeaturedCourses />
       <UpcomingExams />
       <TestimonialsSection />
