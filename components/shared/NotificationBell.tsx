@@ -124,10 +124,14 @@ export default function NotificationBell() {
       )}
 
       {modalNotif && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-[110]" onClick={() => setModalNotif(null)} />
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-            <div className="bg-[#161b22] border border-slate-800 rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60"
+          onClick={() => setModalNotif(null)}
+        >
+          <div
+            className="bg-[#161b22] border border-slate-800 rounded-2xl max-w-lg w-full max-h-[80vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
               <div className="p-6 border-b border-slate-800 flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white">{modalNotif.title}</h3>
                 <button
@@ -141,8 +145,7 @@ export default function NotificationBell() {
                 <SafeMarkdown>{modalNotif.body || ''}</SafeMarkdown>
               </div>
             </div>
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
