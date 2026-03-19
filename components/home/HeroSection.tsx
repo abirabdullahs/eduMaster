@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { GraduationCap, BookOpen, Trophy, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
 
 export default function HeroSection() {
   return (
@@ -9,9 +10,9 @@ export default function HeroSection() {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
 
-      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center relative z-10">
-        {/* Left Content */}
-        <div className="space-y-8 text-center lg:text-left">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row gap-12 lg:gap-16 items-center relative z-10">
+        {/* Left Content - Top on mobile, Left on desktop */}
+        <div className="space-y-8 text-center lg:text-left order-1 lg:w-1/2">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-sm">
             <span className="w-2 h-2 bg-indigo-500 rounded-full animate-ping" />
             <span className="text-indigo-400 text-xs font-bold uppercase tracking-wider">Admission Open for 2026</span>
@@ -60,56 +61,18 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Floating Cards */}
-        <div className="relative hidden lg:block">
-          <div className="relative w-full aspect-square">
-            {/* Main Image or Illustration Placeholder */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-600/10 rounded-3xl border border-white/5 backdrop-blur-sm flex items-center justify-center">
-               <div className="w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl animate-pulse" />
-               <GraduationCap size={120} className="text-indigo-500/30" />
-            </div>
-
-            {/* Floating Card 1 */}
-            <div className="absolute -top-4 -right-4 glass-card p-6 w-56 animate-float">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400">
-                  <BookOpen size={20} />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400">Total Courses</p>
-                  <p className="text-lg font-bold text-white">১০+</p>
-                </div>
-              </div>
-              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div className="w-[85%] h-full bg-indigo-500" />
-              </div>
-            </div>
-
-            {/* Floating Card 2 */}
-            <div className="absolute bottom-12 -left-8 glass-card p-6 w-56 animate-float-delayed">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400">
-                  <Trophy size={20} />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400">Success Rate</p>
-                  <p className="text-lg font-bold text-white">৯৮%</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="w-2 h-2 bg-emerald-500 rounded-full" />
-                ))}
-              </div>
-            </div>
-
-            {/* Floating Card 3 */}
-            <div className="absolute top-1/2 -right-12 glass-card p-4 flex items-center gap-3 animate-float-delayed">
-              <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400">
-                <span className="text-xs font-bold">LIVE</span>
-              </div>
-              <p className="text-xs font-medium text-white">Physics Class Started</p>
-            </div>
+        {/* Hero Image: Below on mobile, Right on desktop */}
+        <div className="relative w-full lg:w-1/2 flex justify-center order-2 shrink-0">
+          <div className="relative w-full max-w-md lg:max-w-lg aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl shadow-indigo-500/20 border border-white/10">
+            <Image
+              src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&q=80"
+              alt="শিক্ষার্থী পড়াশোনা করছেন - EduMaster"
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 1024px) 100vw, 500px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1e]/60 via-transparent to-transparent" />
           </div>
         </div>
       </div>
