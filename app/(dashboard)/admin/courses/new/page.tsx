@@ -19,6 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { cn } from '@/lib/utils';
 import { Profile } from '@/lib/types';
+import CourseMarketingFields, { type CourseMarketingValues } from '@/components/courses/CourseMarketingFields';
 
 const courseSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
@@ -34,10 +35,17 @@ const courseSchema = z.object({
 
 type CourseFormValues = z.infer<typeof courseSchema>;
 
+const emptyMarketing: CourseMarketingValues = {
+  details_markdown: '',
+  curriculum_topics: [],
+  faq_json: [],
+};
+
 export default function NewCoursePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [teachers, setTeachers] = useState<Profile[]>([]);
+  const [marketing, setMarketing] = useState<CourseMarketingValues>(emptyMarketing);
   const router = useRouter();
   const supabase = createClient();
 
@@ -83,8 +91,10 @@ export default function NewCoursePage() {
         .from('courses')
         .insert({
           ...values,
-          // Handle optional empty string for intro_video_url
           intro_video_url: values.intro_video_url || null,
+          details_markdown: marketing.details_markdown.trim() || null,
+          curriculum_topics: marketing.curriculum_topics.filter((t) => t.title.trim() || t.body_md.trim()),
+          faq_json: marketing.faq_json.filter((f) => f.question.trim() || f.answer.trim()),
         })
         .select()
         .single();
@@ -207,6 +217,8 @@ export default function NewCoursePage() {
             </div>
           </div>
         </div>
+
+        <CourseMarketingFields value={marketing} onChange={setMarketing} />
 
         {/* Pricing & Teacher */}
         <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-8 space-y-6">

@@ -14,6 +14,7 @@ import {
   ChevronDown
 } from 'lucide-react'
 import Image from 'next/image'
+import CourseMarketingDisplay from '@/components/courses/CourseMarketingDisplay'
 
 export async function generateMetadata({ params }: { params: Promise<{ courseId: string }> }): Promise<Metadata> {
   const { courseId } = await params;
@@ -40,7 +41,16 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
     .from('courses')
     .select(`
       *,
-      profiles:teacher_id (name, bio, avatar_url, subject_expertise),
+      profiles:teacher_id (
+        name,
+        bio,
+        avatar_url,
+        subject_expertise,
+        education_subject,
+        education_university,
+        expertise_json,
+        experience_time
+      ),
       subjects (
         *,
         chapters (
@@ -57,6 +67,16 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
 
   const enrollmentCount = course.enrollments?.[0]?.count || 0;
   const teacher = course.profiles;
+
+  const { count: teacherCourseCount } = await supabase
+    .from('courses')
+    .select('*', { count: 'exact', head: true })
+    .eq('teacher_id', course.teacher_id)
+    .eq('status', 'published')
+
+  const expertiseList: string[] = Array.isArray((teacher as any)?.expertise_json)
+    ? (teacher as any).expertise_json.filter((x: unknown) => typeof x === 'string')
+    : []
 
   // Sort curriculum by order_index (subjects, chapters, lectures)
   const sortedSubjects = (course.subjects || []).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
@@ -210,6 +230,12 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
               </section>
             )}
 
+            <CourseMarketingDisplay
+              details_markdown={course.details_markdown}
+              curriculum_topics={course.curriculum_topics as any}
+              faq_json={course.faq_json as any}
+            />
+
             {/* What you&apos;ll learn */}
             <section className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-8">
               <h2 className="text-3xl font-bold text-slate-900">What you&apos;ll learn</h2>
@@ -289,16 +315,38 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-900">{teacher?.name}</h3>
-                  <p className="text-sm text-primary font-bold uppercase tracking-widest">{teacher?.subject_expertise || 'Expert Instructor'}</p>
+                  <p className="text-sm text-primary font-bold uppercase tracking-widest">
+                    {(teacher as any)?.education_subject || teacher?.subject_expertise || 'Expert Instructor'}
+                  </p>
+                  {(teacher as any)?.education_university && (
+                    <p className="text-xs text-slate-500 mt-1">{(teacher as any).education_university}</p>
+                  )}
                 </div>
               </div>
+              {expertiseList.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2">
+                  {expertiseList.map((ex) => (
+                    <span
+                      key={ex}
+                      className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg bg-primary/10 text-primary"
+                    >
+                      {ex}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {(teacher as any)?.experience_time && (
+                <p className="text-xs text-center text-slate-500">
+                  Experience: {(teacher as any).experience_time}
+                </p>
+              )}
               <p className="text-sm text-slate-500 leading-relaxed text-center italic">
                 &quot;{teacher?.bio || 'Dedicated to helping students achieve their academic goals through quality education.'}&quot;
               </p>
               <div className="pt-6 border-t border-slate-100">
                 <div className="flex items-center justify-center gap-6">
                   <div className="text-center">
-                    <p className="text-xl font-bold text-slate-900">10+</p>
+                    <p className="text-xl font-bold text-slate-900">{teacherCourseCount ?? 0}</p>
                     <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Courses</p>
                   </div>
                   <div className="w-px h-8 bg-slate-100" />

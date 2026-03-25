@@ -28,6 +28,7 @@ import { formatPrice } from '@/lib/utils';
 import ContentTree from '@/components/courses/ContentTree';
 import { SubjectForm, ChapterForm, LectureForm } from '@/components/courses/forms/CourseContentForms';
 import LectureQuestions from '@/components/courses/LectureQuestions';
+import CourseMarketingFields, { parseCourseMarketingFromDb, type CourseMarketingValues } from '@/components/courses/CourseMarketingFields';
 
 type TabType = 'curriculum' | 'payments' | 'settings';
 
@@ -50,6 +51,11 @@ export default function CourseDetailPage() {
     discount_price: 0,
     description: '',
     thumbnail_url: ''
+  });
+  const [marketing, setMarketing] = useState<CourseMarketingValues>({
+    details_markdown: '',
+    curriculum_topics: [],
+    faq_json: [],
   });
 
   // Modal states
@@ -91,6 +97,7 @@ export default function CourseDetailPage() {
         description: courseRes.data.description || '',
         thumbnail_url: courseRes.data.thumbnail_url || ''
       });
+      setMarketing(parseCourseMarketingFromDb(courseRes.data));
       setSubjects(sortedSubjects);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch course data');
@@ -140,7 +147,10 @@ export default function CourseDetailPage() {
           main_price: settingsForm.main_price,
           discounted_price: settingsForm.discount_price,
           description: settingsForm.description,
-          thumbnail_url: settingsForm.thumbnail_url
+          thumbnail_url: settingsForm.thumbnail_url,
+          details_markdown: marketing.details_markdown.trim() || null,
+          curriculum_topics: marketing.curriculum_topics.filter((t) => t.title.trim() || t.body_md.trim()),
+          faq_json: marketing.faq_json.filter((f) => f.question.trim() || f.answer.trim()),
         })
         .eq('id', courseId);
       
@@ -596,7 +606,7 @@ export default function CourseDetailPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest">Description</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest">Short description</label>
                     <textarea 
                       value={settingsForm.description} 
                       onChange={(e) => setSettingsForm(prev => ({ ...prev, description: e.target.value }))}
@@ -604,14 +614,6 @@ export default function CourseDetailPage() {
                       className="w-full bg-[#0d1117] border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none" 
                     />
                   </div>
-                  <button 
-                    onClick={handleUpdateSettings}
-                    disabled={updating}
-                    className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    {updating ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                    Save Changes
-                  </button>
                 </div>
                 <div className="space-y-6">
                   <div className="p-8 bg-indigo-600/10 border border-indigo-500/20 rounded-3xl space-y-6">
@@ -644,6 +646,17 @@ export default function CourseDetailPage() {
                   </div>
                 </div>
               </div>
+
+              <CourseMarketingFields value={marketing} onChange={setMarketing} />
+
+              <button 
+                onClick={handleUpdateSettings}
+                disabled={updating}
+                className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {updating ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                Save Changes
+              </button>
             </div>
           )}
         </div>

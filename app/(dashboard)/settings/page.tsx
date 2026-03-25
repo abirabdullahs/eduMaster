@@ -15,8 +15,14 @@ import {
   AlertCircle,
   ShieldCheck,
   KeyRound,
-  Shield
+  Shield,
+  Plus,
+  Trash2,
+  BookOpen,
+  ImageIcon,
+  Briefcase
 } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useForm } from 'react-hook-form';
@@ -40,6 +46,16 @@ const passwordSchema = z.object({
 
 export default function SettingsPage() {
   const { user, profile, refreshProfile } = useAuth();
+  const [teacherCourses, setTeacherCourses] = useState<{ id: string; title: string; status: string }[]>([]);
+  const [teacherForm, setTeacherForm] = useState({
+    bio: '',
+    education_subject: '',
+    education_university: '',
+    expertise: [] as string[],
+    expertiseDraft: '',
+    experience_time: '',
+    avatar_url: '',
+  });
   const [updatingProfile, setUpdatingProfile] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -62,22 +78,51 @@ export default function SettingsPage() {
         mobile: profile.mobile || '',
         class: profile.class ?? undefined,
       });
+      const ex = (profile as any).expertise_json;
+      setTeacherForm({
+        bio: profile.bio || '',
+        education_subject: (profile as any).education_subject || '',
+        education_university: (profile as any).education_university || '',
+        expertise: Array.isArray(ex) ? ex.filter((x: unknown) => typeof x === 'string') : [],
+        expertiseDraft: '',
+        experience_time: (profile as any).experience_time || '',
+        avatar_url: profile.avatar_url || '',
+      });
     }
   }, [profile, resetProfile]);
+
+  useEffect(() => {
+    if (!user || profile?.role !== 'teacher') return;
+    (async () => {
+      const { data } = await supabase
+        .from('courses')
+        .select('id, title, status')
+        .eq('teacher_id', user.id)
+        .order('title');
+      setTeacherCourses(data || []);
+    })();
+  }, [user, profile?.role, supabase]);
 
   const onProfileUpdate = async (data: z.infer<typeof profileSchema>) => {
     if (!user) return;
     setUpdatingProfile(true);
     setProfileSuccess(false);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          name: data.name,
-          mobile: data.mobile || null,
-          class: data.class && ['SSC', 'HSC'].includes(data.class) ? data.class : null,
-        })
-        .eq('id', user.id);
+      const baseUpdate: Record<string, unknown> = {
+        name: data.name,
+        mobile: data.mobile || null,
+        class: data.class && ['SSC', 'HSC'].includes(data.class) ? data.class : null,
+      };
+      if (profile?.role === 'teacher') {
+        baseUpdate.bio = teacherForm.bio.trim() || null;
+        baseUpdate.education_subject = teacherForm.education_subject.trim() || null;
+        baseUpdate.education_university = teacherForm.education_university.trim() || null;
+        baseUpdate.expertise_json = teacherForm.expertise;
+        baseUpdate.experience_time = teacherForm.experience_time.trim() || null;
+        baseUpdate.avatar_url = teacherForm.avatar_url.trim() || null;
+      }
+
+      const { error } = await supabase.from('profiles').update(baseUpdate).eq('id', user.id);
 
       if (error) throw error;
       await refreshProfile();
@@ -188,6 +233,155 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
+
+            {profile?.role === 'teacher' && (
+              <div className="pt-6 border-t border-slate-800 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-500/10 rounded-xl">
+                    <Briefcase size={20} className="text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Teacher profile</h3>
+                    <p className="text-xs text-slate-500">Shown on public course pages</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Bio (public)</label>
+                  <textarea
+                    value={teacherForm.bio}
+                    onChange={(e) => setTeacherForm((p) => ({ ...p, bio: e.target.value }))}
+                    rows={3}
+                    placeholder="Short bio shown on course pages..."
+                    className="w-full bg-[#0d1117] border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                      <ImageIcon size={14} /> Photo URL
+                    </label>
+                    <input
+                      value={teacherForm.avatar_url}
+                      onChange={(e) => setTeacherForm((p) => ({ ...p, avatar_url: e.target.value }))}
+                      placeholder="https://..."
+                      className="w-full bg-[#0d1117] border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Education — subject</label>
+                    <input
+                      value={teacherForm.education_subject}
+                      onChange={(e) => setTeacherForm((p) => ({ ...p, education_subject: e.target.value }))}
+                      placeholder="e.g. Physics"
+                      className="w-full bg-[#0d1117] border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">University</label>
+                    <input
+                      value={teacherForm.education_university}
+                      onChange={(e) => setTeacherForm((p) => ({ ...p, education_university: e.target.value }))}
+                      placeholder="e.g. University of Dhaka"
+                      className="w-full bg-[#0d1117] border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Experience</label>
+                    <input
+                      value={teacherForm.experience_time}
+                      onChange={(e) => setTeacherForm((p) => ({ ...p, experience_time: e.target.value }))}
+                      placeholder="e.g. 8 years teaching"
+                      className="w-full bg-[#0d1117] border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Expertise (add multiple)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {teacherForm.expertise.map((tag, i) => (
+                      <span
+                        key={`${tag}-${i}`}
+                        className="inline-flex items-center gap-1 pl-3 pr-1 py-1 rounded-lg bg-indigo-500/20 text-indigo-200 text-xs font-medium"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTeacherForm((p) => ({
+                              ...p,
+                              expertise: p.expertise.filter((_, j) => j !== i),
+                            }))
+                          }
+                          className="p-1 rounded hover:bg-white/10 text-slate-400"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      value={teacherForm.expertiseDraft}
+                      onChange={(e) => setTeacherForm((p) => ({ ...p, expertiseDraft: e.target.value }))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const t = teacherForm.expertiseDraft.trim();
+                          if (t) {
+                            setTeacherForm((p) => ({
+                              ...p,
+                              expertise: [...p.expertise, t],
+                              expertiseDraft: '',
+                            }));
+                          }
+                        }
+                      }}
+                      placeholder="Type expertise and press Enter"
+                      className="flex-1 bg-[#0d1117] border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const t = teacherForm.expertiseDraft.trim();
+                        if (!t) return;
+                        setTeacherForm((p) => ({
+                          ...p,
+                          expertise: [...p.expertise, t],
+                          expertiseDraft: '',
+                        }));
+                      }}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white text-xs font-bold flex items-center gap-1"
+                    >
+                      <Plus size={14} /> Add
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <BookOpen size={14} /> Your courses (from platform)
+                  </label>
+                  <p className="text-[11px] text-slate-600">Synced automatically from courses assigned to you.</p>
+                  <ul className="rounded-xl border border-slate-800 divide-y divide-slate-800 bg-[#0d1117] max-h-48 overflow-y-auto">
+                    {teacherCourses.length === 0 ? (
+                      <li className="px-4 py-3 text-sm text-slate-500">No courses yet.</li>
+                    ) : (
+                      teacherCourses.map((c) => (
+                        <li key={c.id} className="px-4 py-2 flex items-center justify-between gap-2 text-sm">
+                          <span className="text-white truncate">{c.title}</span>
+                          <span className="text-[10px] uppercase text-slate-500 shrink-0">{c.status}</span>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                  <Link
+                    href="/teacher/courses"
+                    className="text-xs font-bold text-indigo-400 hover:text-indigo-300"
+                  >
+                    Open teacher courses →
+                  </Link>
+                </div>
+              </div>
+            )}
             <div className="flex items-center justify-between pt-2">
               {profileSuccess && (
                 <div className="flex items-center gap-2 text-emerald-500 text-sm">

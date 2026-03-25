@@ -19,13 +19,23 @@ export interface Profile {
   bio?: string;
   subject_expertise?: string;
   avatar_url?: string;
+  education_subject?: string | null;
+  education_university?: string | null;
+  expertise_json?: string[] | null;
+  experience_time?: string | null;
   created_at: string;
 }
+
+export type CourseCurriculumTopic = { title: string; body_md: string };
+export type CourseFaqItem = { question: string; answer: string };
 
 export interface Course {
   id: string;
   title: string;
   description?: string;
+  details_markdown?: string | null;
+  curriculum_topics?: CourseCurriculumTopic[] | null;
+  faq_json?: CourseFaqItem[] | null;
   thumbnail_url?: string;
   intro_video_url?: string;
   main_price: number;

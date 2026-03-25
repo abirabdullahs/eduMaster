@@ -20,8 +20,14 @@ import {
   Mail,
   MessageSquare,
   Plus,
-  X
+  X,
+  LayoutTemplate,
+  Save
 } from 'lucide-react';
+import CourseMarketingFields, {
+  parseCourseMarketingFromDb,
+  type CourseMarketingValues,
+} from '@/components/courses/CourseMarketingFields';
 import { cn } from '@/lib/utils';
 import { Course, Subject, Chapter, Lecture, Profile, Enrollment, LectureProgress } from '@/lib/types';
 import Link from 'next/link';
@@ -34,7 +40,13 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
   const [subjects, setSubjects] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'content' | 'students'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'students' | 'landing'>('content');
+  const [marketing, setMarketing] = useState<CourseMarketingValues>({
+    details_markdown: '',
+    curriculum_topics: [],
+    faq_json: [],
+  });
+  const [savingMarketing, setSavingMarketing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const supabase = createClient();
@@ -60,6 +72,7 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
         .eq('id', courseId)
         .single();
       setCourse(courseData);
+      if (courseData) setMarketing(parseCourseMarketingFromDb(courseData));
 
       // 2. Fetch Content Tree
       const { data: subjectData } = await supabase
@@ -259,6 +272,30 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
     }
   };
 
+  const handleSaveMarketing = async () => {
+    setSavingMarketing(true);
+    try {
+      const res = await fetch('/api/teacher/course-marketing', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_id: courseId,
+          details_markdown: marketing.details_markdown,
+          curriculum_topics: marketing.curriculum_topics,
+          faq_json: marketing.faq_json,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      alert('Landing page content saved.');
+      fetchData();
+    } catch (e: any) {
+      alert(e.message || 'Failed to save');
+    } finally {
+      setSavingMarketing(false);
+    }
+  };
+
   const filteredStudents = students.filter(s => 
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -321,20 +358,30 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-[#161b22] border border-slate-800 rounded-2xl p-1.5 w-fit">
+        <div className="flex flex-wrap gap-1.5 bg-[#161b22] border border-slate-800 rounded-2xl p-1.5 w-fit">
           <button
             onClick={() => setActiveTab('content')}
             className={cn(
-              "px-8 py-3 rounded-xl text-sm font-bold capitalize transition-all",
+              "px-6 py-3 rounded-xl text-sm font-bold capitalize transition-all",
               activeTab === 'content' ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
             )}
           >
             Course Content
           </button>
           <button
+            onClick={() => setActiveTab('landing')}
+            className={cn(
+              "px-6 py-3 rounded-xl text-sm font-bold capitalize transition-all flex items-center gap-2",
+              activeTab === 'landing' ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+            )}
+          >
+            <LayoutTemplate size={16} />
+            Landing page
+          </button>
+          <button
             onClick={() => setActiveTab('students')}
             className={cn(
-              "px-8 py-3 rounded-xl text-sm font-bold capitalize transition-all",
+              "px-6 py-3 rounded-xl text-sm font-bold capitalize transition-all",
               activeTab === 'students' ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
             )}
           >
@@ -342,7 +389,23 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
           </button>
         </div>
 
-        {activeTab === 'content' ? (
+        {activeTab === 'landing' ? (
+          <div className="max-w-4xl space-y-6">
+            <p className="text-sm text-slate-400">
+              Public course page: long description (Markdown), curriculum highlights, and FAQ. Short summary still comes from admin “description”.
+            </p>
+            <CourseMarketingFields value={marketing} onChange={setMarketing} />
+            <button
+              type="button"
+              onClick={handleSaveMarketing}
+              disabled={savingMarketing}
+              className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-2xl flex items-center gap-2"
+            >
+              {savingMarketing ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+              Save landing page
+            </button>
+          </div>
+        ) : activeTab === 'content' ? (
           <div className="max-w-4xl">
             <ContentTree 
               subjects={subjects}
@@ -373,7 +436,7 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
               </div>
             )}
           </div>
-        ) : (
+        ) : activeTab === 'students' ? (
           <div className="space-y-6">
             <div className="relative max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
@@ -467,7 +530,7 @@ export default function TeacherCourseDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* Modals */}
         <SubjectForm 
