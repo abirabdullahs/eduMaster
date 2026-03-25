@@ -57,27 +57,18 @@ export default function CourseMarketingFields({ value, onChange, className }: Pr
       </div>
 
       <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-8 space-y-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <BookOpen size={20} className="text-emerald-500" />
-              Curriculum outline (topics)
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Marketing curriculum topics — title + Markdown body (e.g. module summaries).
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={addTopic}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 rounded-xl text-xs font-bold"
-          >
-            <Plus size={16} /> Add topic
-          </button>
+        <div>
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <BookOpen size={20} className="text-emerald-500" />
+            Curriculum outline (topics)
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">
+            Marketing curriculum topics — title + Markdown body (e.g. module summaries).
+          </p>
         </div>
         <div className="space-y-4">
           {value.curriculum_topics.length === 0 ? (
-            <p className="text-sm text-slate-600 italic">No topics yet. Click &quot;Add topic&quot;.</p>
+            <p className="text-sm text-slate-600 italic">No topics yet — use &quot;Add topic&quot; below.</p>
           ) : (
             value.curriculum_topics.map((t, i) => (
               <div key={i} className="p-4 rounded-2xl border border-slate-800 bg-[#0d1117] space-y-3">
@@ -108,28 +99,26 @@ export default function CourseMarketingFields({ value, onChange, className }: Pr
             ))
           )}
         </div>
+        <button
+          type="button"
+          onClick={addTopic}
+          className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 rounded-xl text-xs font-bold border border-emerald-500/20"
+        >
+          <Plus size={16} /> Add topic
+        </button>
       </div>
 
       <div className="bg-[#161b22] border border-slate-800 rounded-3xl p-8 space-y-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <HelpCircle size={20} className="text-amber-500" />
-              FAQ
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">Questions and answers (Markdown in answers).</p>
-          </div>
-          <button
-            type="button"
-            onClick={addFaq}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 rounded-xl text-xs font-bold"
-          >
-            <Plus size={16} /> Add FAQ
-          </button>
+        <div>
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <HelpCircle size={20} className="text-amber-500" />
+            FAQ
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">Questions and answers (Markdown in answers).</p>
         </div>
         <div className="space-y-4">
           {value.faq_json.length === 0 ? (
-            <p className="text-sm text-slate-600 italic">No FAQ items yet.</p>
+            <p className="text-sm text-slate-600 italic">No FAQ items yet — use &quot;Add FAQ&quot; below.</p>
           ) : (
             value.faq_json.map((f, i) => (
               <div key={i} className="p-4 rounded-2xl border border-slate-800 bg-[#0d1117] space-y-3">
@@ -159,6 +148,13 @@ export default function CourseMarketingFields({ value, onChange, className }: Pr
             ))
           )}
         </div>
+        <button
+          type="button"
+          onClick={addFaq}
+          className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-3 bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 rounded-xl text-xs font-bold border border-amber-500/20"
+        >
+          <Plus size={16} /> Add FAQ
+        </button>
       </div>
     </div>
   );
