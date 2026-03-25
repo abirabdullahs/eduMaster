@@ -90,9 +90,9 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
     }));
 
   return (
-    <div className="min-h-screen bg-slate-50 font-hind-siliguri">
+    <div className="min-h-screen bg-[#060910] text-slate-200 font-hind-siliguri">
       {/* Hero Section */}
-      <div className="bg-[#0f172a] text-white py-20 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-[#0c1220] to-[#060910] text-white py-16 md:py-20 relative overflow-hidden border-b border-slate-800/80">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent pointer-events-none" />
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center relative z-10">
           <div className="space-y-8">
@@ -145,8 +145,8 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
             </div>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl text-slate-900 space-y-8 border border-white/10">
-            <div className="aspect-video relative bg-slate-100 rounded-3xl overflow-hidden shadow-inner group">
+          <div className="bg-[#121820] rounded-[2.5rem] p-8 shadow-2xl shadow-black/40 text-slate-100 space-y-8 border border-slate-700/80 ring-1 ring-white/5">
+            <div className="aspect-video relative bg-slate-900 rounded-3xl overflow-hidden shadow-inner group border border-slate-800">
               {course.thumbnail_url ? (
                 <Image 
                   src={course.thumbnail_url} 
@@ -156,12 +156,12 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                <div className="w-full h-full flex items-center justify-center text-slate-600">
                   <PlayCircle size={64} />
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                <div className="w-16 h-16 bg-white/95 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
                   <PlayCircle size={32} className="text-primary" />
                 </div>
               </div>
@@ -170,20 +170,20 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="text-xs text-slate-400 uppercase font-bold tracking-widest">Course Fee</p>
+                  <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Course Fee</p>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl font-bold text-primary">
+                    <span className="text-4xl font-bold text-indigo-400">
                       {formatPrice(course.discounted_price || course.main_price)}
                     </span>
                     {course.discounted_price && (
-                      <span className="text-lg text-slate-400 line-through font-medium">
+                      <span className="text-lg text-slate-500 line-through font-medium">
                         {formatPrice(course.main_price)}
                       </span>
                     )}
                   </div>
                 </div>
                 {course.discounted_price && (
-                  <div className="bg-red-500 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-lg shadow-red-500/20">
+                  <div className="bg-red-500 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-lg shadow-red-500/30">
                     {Math.round(((course.main_price - course.discounted_price) / course.main_price) * 100)}% OFF
                   </div>
                 )}
@@ -191,16 +191,16 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
 
               <EnrollButton 
                 course={course}
-                className="w-full py-4 text-lg"
+                className="w-full py-4 text-lg rounded-2xl"
               />
 
               <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
                   <ShieldCheck size={16} className="text-emerald-500" />
                   Lifetime Access
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                  <Clock size={16} className="text-indigo-500" />
+                <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                  <Clock size={16} className="text-indigo-400" />
                   Self-paced Learning
                 </div>
               </div>
@@ -210,17 +210,17 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-24">
-        <div className="grid lg:grid-cols-3 gap-16">
+      <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="grid lg:grid-cols-3 gap-12 lg:gap-16">
           <div className="lg:col-span-2 space-y-16">
             {/* Intro Video */}
             {course.intro_video_url && (
               <section className="space-y-6">
-                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                  <PlayCircle className="text-primary" />
+                <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                  <PlayCircle className="text-indigo-400" />
                   Intro Video
                 </h2>
-                <div className="aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+                <div className="aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-700/80 ring-1 ring-white/5">
                   <iframe
                     src={course.intro_video_url.replace('watch?v=', 'embed/')}
                     className="w-full h-full"
@@ -234,16 +234,17 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
               details_markdown={course.details_markdown}
               curriculum_topics={course.curriculum_topics as any}
               faq_json={course.faq_json as any}
+              dark
             />
 
             {/* What you&apos;ll learn */}
-            <section className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-8">
-              <h2 className="text-3xl font-bold text-slate-900">What you&apos;ll learn</h2>
+            <section className="bg-[#121820] rounded-[2.5rem] p-10 border border-slate-800 space-y-8 shadow-xl shadow-black/20">
+              <h2 className="text-3xl font-bold text-white">What you&apos;ll learn</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {sortedSubjects.map((subject: any) => (
                   <div key={subject.id} className="flex items-start gap-3">
                     <CheckCircle2 className="text-emerald-500 shrink-0 mt-1" size={20} />
-                    <span className="text-slate-700 font-medium">{subject.title}</span>
+                    <span className="text-slate-300 font-medium">{subject.title}</span>
                   </div>
                 ))}
               </div>
@@ -252,8 +253,8 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
             {/* Curriculum */}
             <section className="space-y-8">
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                  <BookOpen className="text-primary" />
+                <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                  <BookOpen className="text-indigo-400" />
                   Course Curriculum
                 </h2>
                 <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">
@@ -263,29 +264,29 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
 
               <div className="space-y-6">
                 {sortedSubjects.map((subject: any) => (
-                  <div key={subject.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden group">
-                    <div className="p-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-                      <h3 className="text-xl font-bold text-slate-900">{subject.title}</h3>
-                      <ChevronDown className="text-slate-400 group-hover:text-primary transition-colors" />
+                  <div key={subject.id} className="bg-[#121820] rounded-3xl border border-slate-800 overflow-hidden group shadow-lg shadow-black/20">
+                    <div className="p-6 bg-slate-900/50 border-b border-slate-800 flex items-center justify-between">
+                      <h3 className="text-xl font-bold text-white">{subject.title}</h3>
+                      <ChevronDown className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
                     </div>
                     <div className="p-6 space-y-8">
                       {subject.chapters?.map((chapter: any) => (
                         <div key={chapter.id} className="space-y-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold">
                               {(chapter.order_index ?? 0) + 1}
                             </div>
-                            <h4 className="font-bold text-slate-800">{chapter.title}</h4>
+                            <h4 className="font-bold text-slate-200">{chapter.title}</h4>
                           </div>
                           <div className="grid gap-3 pl-11">
                             {chapter.lectures?.map((lecture: any) => (
                               <div key={lecture.id} className="flex items-center justify-between text-sm text-slate-500 group/item">
                                 <div className="flex items-center gap-3">
-                                  <PlayCircle size={14} className="text-slate-300 group-hover/item:text-primary transition-colors" />
-                                  <span>{lecture.title}</span>
+                                  <PlayCircle size={14} className="text-slate-600 group-hover/item:text-indigo-400 transition-colors" />
+                                  <span className="text-slate-400">{lecture.title}</span>
                                 </div>
                                 {lecture.video_url && (
-                                  <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded">Video</span>
+                                  <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Video</span>
                                 )}
                               </div>
                             ))}
@@ -302,20 +303,20 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-8">
             {/* Teacher Bio */}
-            <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 space-y-6 sticky top-24">
+            <div className="bg-[#121820] rounded-[2.5rem] p-8 border border-slate-800 space-y-6 sticky top-24 shadow-xl shadow-black/30">
               <div className="text-center space-y-4">
-                <div className="w-24 h-24 rounded-full bg-slate-100 mx-auto overflow-hidden border-4 border-white shadow-lg">
+                <div className="w-24 h-24 rounded-full bg-slate-800 mx-auto overflow-hidden border-4 border-slate-700 shadow-lg">
                   {teacher?.avatar_url ? (
                     <Image src={teacher.avatar_url} alt={teacher.name} width={96} height={96} className="object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                    <div className="w-full h-full flex items-center justify-center text-slate-600">
                       <GraduationCap size={40} />
                     </div>
                   )}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">{teacher?.name}</h3>
-                  <p className="text-sm text-primary font-bold uppercase tracking-widest">
+                  <h3 className="text-xl font-bold text-white">{teacher?.name}</h3>
+                  <p className="text-sm text-indigo-400 font-bold uppercase tracking-widest">
                     {(teacher as any)?.education_subject || teacher?.subject_expertise || 'Expert Instructor'}
                   </p>
                   {(teacher as any)?.education_university && (
@@ -328,7 +329,7 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
                   {expertiseList.map((ex) => (
                     <span
                       key={ex}
-                      className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg bg-primary/10 text-primary"
+                      className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300"
                     >
                       {ex}
                     </span>
@@ -340,19 +341,19 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
                   Experience: {(teacher as any).experience_time}
                 </p>
               )}
-              <p className="text-sm text-slate-500 leading-relaxed text-center italic">
+              <p className="text-sm text-slate-400 leading-relaxed text-center italic">
                 &quot;{teacher?.bio || 'Dedicated to helping students achieve their academic goals through quality education.'}&quot;
               </p>
-              <div className="pt-6 border-t border-slate-100">
+              <div className="pt-6 border-t border-slate-800">
                 <div className="flex items-center justify-center gap-6">
                   <div className="text-center">
-                    <p className="text-xl font-bold text-slate-900">{teacherCourseCount ?? 0}</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Courses</p>
+                    <p className="text-xl font-bold text-white">{teacherCourseCount ?? 0}</p>
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Courses</p>
                   </div>
-                  <div className="w-px h-8 bg-slate-100" />
+                  <div className="w-px h-8 bg-slate-800" />
                   <div className="text-center">
-                    <p className="text-xl font-bold text-slate-900">5k+</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Students</p>
+                    <p className="text-xl font-bold text-white">5k+</p>
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Students</p>
                   </div>
                 </div>
               </div>

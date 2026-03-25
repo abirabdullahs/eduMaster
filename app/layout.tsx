@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
+import StudentLectureDigestGate from "@/components/student/StudentLectureDigestGate";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default function RootLayout({
     <html lang="en" className={`${poppins.variable} ${hindSiliguri.variable}`}>
       <body className="font-sans antialiased">
         {children}
+        <StudentLectureDigestGate />
       </body>
     </html>
   );

@@ -55,9 +55,11 @@ export default function LoginPage() {
         if (profileError) throw profileError;
 
         if (profile.role === 'admin') {
+          router.refresh();
           router.push('/admin');
         } else if (profile.role === 'teacher') {
           if (profile.status === 'active') {
+            router.refresh();
             router.push('/teacher');
           } else if (profile.status === 'pending') {
             setPendingTeacher(true);
@@ -67,6 +69,7 @@ export default function LoginPage() {
             await supabase.auth.signOut();
           }
         } else if (profile.role === 'student') {
+          router.refresh();
           router.push('/student');
         }
       }

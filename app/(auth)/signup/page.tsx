@@ -79,8 +79,12 @@ export default function SignupPage() {
           if (profileError) throw profileError;
         }
         // If no session (email confirmation pending), trigger already created profile with metadata
-        router.push(authData.session ? '/student' : '/login?message=Check your email to confirm');
-        router.refresh();
+        if (authData.session) {
+          router.refresh();
+          router.push('/student');
+        } else {
+          router.push('/login?message=Check your email to confirm');
+        }
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup');
