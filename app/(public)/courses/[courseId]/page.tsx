@@ -235,6 +235,7 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
               curriculum_topics={course.curriculum_topics as any}
               faq_json={course.faq_json as any}
               dark
+              themeSeed={course.id}
             />
 
             {/* What you&apos;ll learn */}

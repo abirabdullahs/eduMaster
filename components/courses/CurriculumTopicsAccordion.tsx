@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
 import SafeMarkdown from '@/components/shared/SafeMarkdown';
 import type { CourseCurriculumTopic } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
+/** Visual themes — assignment per topic is seeded (course + index + title) so it looks random but stays stable. */
 const THEMES = [
   {
     bar: 'from-violet-500 to-fuchsia-600',
@@ -49,16 +50,66 @@ const THEMES = [
     icon: 'text-indigo-400',
     hover: 'hover:border-indigo-500/40',
   },
+  {
+    bar: 'from-lime-500 to-green-600',
+    ring: 'ring-lime-500/25',
+    bg: 'bg-lime-500/5',
+    icon: 'text-lime-400',
+    hover: 'hover:border-lime-500/35',
+  },
+  {
+    bar: 'from-sky-500 to-indigo-600',
+    ring: 'ring-sky-500/30',
+    bg: 'bg-sky-500/5',
+    icon: 'text-sky-400',
+    hover: 'hover:border-sky-500/40',
+  },
+  {
+    bar: 'from-red-500 to-rose-600',
+    ring: 'ring-red-500/25',
+    bg: 'bg-red-500/5',
+    icon: 'text-red-400',
+    hover: 'hover:border-red-500/35',
+  },
+  {
+    bar: 'from-fuchsia-500 to-purple-700',
+    ring: 'ring-fuchsia-500/30',
+    bg: 'bg-fuchsia-500/5',
+    icon: 'text-fuchsia-400',
+    hover: 'hover:border-fuchsia-500/40',
+  },
 ];
+
+function stableHash(input: string): number {
+  let h = 5381;
+  for (let i = 0; i < input.length; i++) {
+    h = (h * 33) ^ input.charCodeAt(i);
+  }
+  return Math.abs(h) >>> 0;
+}
+
+function themeIndexForTopic(seed: string, index: number, title: string): number {
+  const mix = stableHash(`${seed}|${index}|${title}`);
+  const salt = stableHash(`${title}|${seed}`) % 7;
+  return (mix + salt + index * 13) % THEMES.length;
+}
 
 export default function CurriculumTopicsAccordion({
   topics,
   dark = true,
+  themeSeed = '',
 }: {
   topics: CourseCurriculumTopic[];
   dark?: boolean;
+  /** e.g. course id — makes theme order unique per course, stable across renders */
+  themeSeed?: string;
 }) {
   const [open, setOpen] = useState<number | null>(0);
+
+  const themeIndices = useMemo(() => {
+    const seed = themeSeed || 'default';
+    return topics.map((t, i) => themeIndexForTopic(seed, i, t.title || ''));
+  }, [topics, themeSeed]);
 
   if (!topics.length) return null;
 
@@ -80,7 +131,7 @@ export default function CurriculumTopicsAccordion({
       </p>
       <div className="space-y-3">
         {topics.map((t, i) => {
-          const theme = THEMES[i % THEMES.length];
+          const theme = THEMES[themeIndices[i] ?? 0];
           const title = t.title?.trim() || `Topic ${i + 1}`;
           const isOpen = open === i;
           const hasBody = !!(t.body_md?.trim());
