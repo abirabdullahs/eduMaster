@@ -11,7 +11,10 @@ import {
   PlayCircle, 
   Clock,
   ShieldCheck,
-  ChevronDown
+  ChevronDown,
+  Sparkles,
+  Award,
+  Building2
 } from 'lucide-react'
 import Image from 'next/image'
 import CourseMarketingDisplay from '@/components/courses/CourseMarketingDisplay'
@@ -303,58 +306,95 @@ export default async function CourseDetail({ params }: { params: Promise<{ cours
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-8">
-            {/* Teacher Bio */}
-            <div className="bg-[#121820] rounded-[2.5rem] p-8 border border-slate-800 space-y-6 sticky top-24 shadow-xl shadow-black/30">
-              <div className="text-center space-y-4">
-                <div className="w-24 h-24 rounded-full bg-slate-800 mx-auto overflow-hidden border-4 border-slate-700 shadow-lg">
-                  {teacher?.avatar_url ? (
-                    <Image src={teacher.avatar_url} alt={teacher.name} width={96} height={96} className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-600">
-                      <GraduationCap size={40} />
+            {/* Teacher card */}
+            <div className="sticky top-24">
+              <div className="relative rounded-[2rem] p-[1px] bg-gradient-to-br from-indigo-500/50 via-violet-500/35 to-cyan-500/40 shadow-2xl shadow-indigo-950/50">
+                <div className="relative overflow-hidden rounded-[calc(2rem-1px)] bg-[#0b0f14] border border-white/[0.06]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 via-transparent to-cyan-600/5 pointer-events-none" />
+                  <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[140%] h-40 bg-gradient-to-r from-indigo-600/25 via-violet-600/20 to-cyan-600/20 blur-3xl rounded-full pointer-events-none" />
+
+                  <div className="relative px-6 pt-8 pb-6 text-center space-y-5">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300">
+                      <Sparkles size={12} className="text-amber-400" />
+                      Instructor
                     </div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">{teacher?.name}</h3>
-                  <p className="text-sm text-indigo-400 font-bold uppercase tracking-widest">
-                    {(teacher as any)?.education_subject || teacher?.subject_expertise || 'Expert Instructor'}
-                  </p>
-                  {(teacher as any)?.education_university && (
-                    <p className="text-xs text-slate-500 mt-1">{(teacher as any).education_university}</p>
-                  )}
-                </div>
-              </div>
-              {expertiseList.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-2">
-                  {expertiseList.map((ex) => (
-                    <span
-                      key={ex}
-                      className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300"
-                    >
-                      {ex}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {(teacher as any)?.experience_time && (
-                <p className="text-xs text-center text-slate-500">
-                  Experience: {(teacher as any).experience_time}
-                </p>
-              )}
-              <p className="text-sm text-slate-400 leading-relaxed text-center italic">
-                &quot;{teacher?.bio || 'Dedicated to helping students achieve their academic goals through quality education.'}&quot;
-              </p>
-              <div className="pt-6 border-t border-slate-800">
-                <div className="flex items-center justify-center gap-6">
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-white">{teacherCourseCount ?? 0}</p>
-                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Courses</p>
-                  </div>
-                  <div className="w-px h-8 bg-slate-800" />
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-white">5k+</p>
-                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Students</p>
+
+                    <div className="relative mx-auto w-[7.5rem] h-[7.5rem]">
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 p-[3px] shadow-lg shadow-indigo-500/25">
+                        <div className="w-full h-full rounded-full bg-[#0b0f14] p-[3px] overflow-hidden">
+                          <div className="w-full h-full rounded-full bg-slate-800 overflow-hidden ring-2 ring-slate-700/80">
+                            {teacher?.avatar_url ? (
+                              <Image
+                                src={teacher.avatar_url}
+                                alt={teacher.name || 'Instructor'}
+                                width={120}
+                                height={120}
+                                className="object-cover w-full h-full"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-indigo-400">
+                                <GraduationCap size={44} strokeWidth={1.5} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-bold text-white tracking-tight">{teacher?.name}</h3>
+                      <p className="text-xs font-bold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+                        {(teacher as any)?.education_subject || teacher?.subject_expertise || 'Expert Instructor'}
+                      </p>
+                      {(teacher as any)?.education_university && (
+                        <p className="flex items-center justify-center gap-1.5 text-xs text-slate-500 pt-1">
+                          <Building2 size={12} className="text-slate-600 shrink-0" />
+                          {(teacher as any).education_university}
+                        </p>
+                      )}
+                    </div>
+
+                    {expertiseList.length > 0 && (
+                      <div className="flex flex-wrap justify-center gap-1.5">
+                        {expertiseList.map((ex) => (
+                          <span
+                            key={ex}
+                            className="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700/80"
+                          >
+                            {ex}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {(teacher as any)?.experience_time && (
+                      <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
+                        <Award size={14} className="text-amber-500/90 shrink-0" />
+                        <span>{(teacher as any).experience_time}</span>
+                      </div>
+                    )}
+
+                    <blockquote className="relative text-left rounded-2xl bg-slate-900/60 border border-slate-800/80 px-4 py-3.5">
+                      <span className="absolute top-2 left-3 text-3xl leading-none text-indigo-500/30 font-serif select-none">&ldquo;</span>
+                      <p className="text-sm text-slate-400 leading-relaxed pl-4 italic relative z-[1]">
+                        {teacher?.bio || 'Dedicated to helping students achieve their academic goals through quality education.'}
+                      </p>
+                    </blockquote>
+
+                    <div className="grid grid-cols-2 gap-3 pt-1">
+                      <div className="rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700/50 px-3 py-3 text-center">
+                        <p className="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                          {teacherCourseCount ?? 0}
+                        </p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">Courses</p>
+                      </div>
+                      <div className="rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700/50 px-3 py-3 text-center">
+                        <p className="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                          5k+
+                        </p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">Students</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
