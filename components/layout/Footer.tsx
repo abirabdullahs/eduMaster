@@ -17,16 +17,16 @@ export default function Footer() {
             বাংলাদেশের সেরা অনলাইন লার্নিং প্ল্যাটফর্ম। SSC ও HSC শিক্ষার্থীদের জন্য মানসম্মত শিক্ষা নিশ্চিত করাই আমাদের লক্ষ্য।
           </p>
           <div className="flex items-center gap-4">
-            <Link href="#" className="w-10 h-10 bg-white/5 hover:bg-indigo-600/20 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all border border-white/10">
+            <Link href="https://www.facebook.com/profile.php?id=61575709616273" className="w-10 h-10 bg-white/5 hover:bg-indigo-600/20 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all border border-white/10">
               <Facebook size={18} />
             </Link>
             <Link href="#" className="w-10 h-10 bg-white/5 hover:bg-indigo-600/20 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all border border-white/10">
               <Twitter size={18} />
             </Link>
-            <Link href="#" className="w-10 h-10 bg-white/5 hover:bg-indigo-600/20 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all border border-white/10">
+            <Link href="https://www.instagram.com/_abirabdullah_?igsh=bG4yM2tiMHg4c2Zt" className="w-10 h-10 bg-white/5 hover:bg-indigo-600/20 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all border border-white/10">
               <Instagram size={18} />
             </Link>
-            <Link href="#" className="w-10 h-10 bg-white/5 hover:bg-indigo-600/20 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all border border-white/10">
+            <Link href="https://www.youtube.com/@radiance_abir" className="w-10 h-10 bg-white/5 hover:bg-indigo-600/20 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-400 transition-all border border-white/10">
               <Youtube size={18} />
             </Link>
           </div>
